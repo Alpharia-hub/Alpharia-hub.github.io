@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Progress — Alpharia</title>
+  <meta name="description" content="Track your reading assessment scores and learning progress over time.">
+
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Shared Dashboard Design System -->
+  <link rel="stylesheet" href="css/student-dashboard-clean.css">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    /* ── Progress page-specific styles ── */
+
+    /* Page header */
+    .pg-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.25rem;
+    }
+
+    .pg-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--sd-text);
+      letter-spacing: -0.5px;
+    }
+
+    /* Period pill buttons */
+    .pg-period-group {
+      display: flex;
+      border: 1.5px solid var(--sd-border);
+      border-radius: 10px;
+      overflow: hidden;
+      background: var(--sd-surface);
+    }
+
+    .pg-period-btn {
+      background: none;
+      border: none;
+      padding: 0.45rem 1rem;
+      font-family: var(--sd-font);
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--sd-text-3);
+      cursor: pointer;
+      transition: var(--sd-transition);
+    }
+
+    .pg-period-btn:not(:last-child) {
+      border-right: 1.5px solid var(--sd-border);
+    }
+
+    .pg-period-btn.active,
+    .pg-period-btn:hover {
+      background: var(--sd-primary);
+      color: white;
+    }
+
+    /* Stat cards row */
+    .pg-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+    }
+
+    .pg-stat {
+      background: var(--sd-surface);
+      border: 1.5px solid var(--sd-border);
+      border-radius: var(--sd-radius);
+      padding: 1.4rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1.1rem;
+      transition: var(--sd-transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .pg-stat::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--stat-color, var(--sd-primary));
+      border-radius: 0 0 12px 12px;
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.35s ease;
+    }
+
+    .pg-stat:hover {
+      box-shadow: var(--sd-shadow-md);
+      transform: translateY(-2px);
+    }
+
+    .pg-stat:hover::after { transform: scaleX(1); }
+
+    .pg-stat-icon {
+      width: 50px; height: 50px;
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem;
+      flex-shrink: 0;
+      background: var(--stat-bg, rgba(79,70,229,.1));
+      color: var(--stat-color, var(--sd-primary));
+    }
+
+    .pg-stat-info { flex: 1; min-width: 0; }
+
+    .pg-stat-label {
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: var(--sd-text-3);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .pg-stat-value {
+      font-size: 1.9rem;
+      font-weight: 800;
+      color: var(--sd-text);
+      letter-spacing: -1px;
+      line-height: 1.1;
+      margin: 0.1rem 0;
+    }
+
+    .pg-stat-sub {
+      font-size: 0.75rem;
+      color: var(--sd-text-3);
+    }
+
+    /* Chart card */
+    .pg-chart-card {
+      background: var(--sd-surface);
+      border: 1.5px solid var(--sd-border);
+      border-radius: var(--sd-radius);
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .pg-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.1rem 1.5rem;
+      border-bottom: 1px solid var(--sd-border);
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .pg-card-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--sd-text);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .pg-card-title i { color: var(--sd-primary); }
+
+    .pg-card-body {
+      padding: 1.5rem;
+    }
+
+    /* Chart wrapper */
+    .pg-chart-wrap {
+      position: relative;
+      height: 280px;
+    }
+
+    /* Activity list */
+    .pg-activity-list { list-style: none; margin: 0; padding: 0; }
+
+    .pg-activity-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.9rem;
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--sd-border);
+      transition: var(--sd-transition);
+    }
+
+    .pg-activity-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .pg-activity-item:first-child { padding-top: 0; }
+
+    .pg-act-icon {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      background: var(--sd-primary-lt);
+      color: var(--sd-primary);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .pg-act-main { flex: 1; min-width: 0; }
+
+    .pg-act-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--sd-text);
+      margin-bottom: 0.2rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .pg-act-sub {
+      font-size: 0.78rem;
+      color: var(--sd-text-3);
+    }
+
+    .pg-act-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.25rem;
+      flex-shrink: 0;
+    }
+
+    .pg-act-score {
+      font-size: 0.92rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .pg-act-time {
+      font-size: 0.72rem;
+      color: var(--sd-text-3);
+    }
+
+    /* Two-col layout */
+    .pg-two-col {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 1.25rem;
+    }
+
+    /* Skill bars section */
+    .pg-skill-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .pg-skill-row:last-child { margin-bottom: 0; }
+
+    .pg-skill-name {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--sd-text-2);
+      width: 110px;
+      flex-shrink: 0;
+    }
+
+    .pg-skill-bar {
+      flex: 1;
+      height: 8px;
+      background: var(--sd-surface-2);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .pg-skill-fill {
+      height: 100%;
+      border-radius: 10px;
+      background: var(--sd-primary);
+      transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .pg-skill-pct {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--sd-text);
+      width: 36px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    /* Empty state */
+    .pg-empty {
+      text-align: center;
+      padding: 2.5rem 1rem;
+      color: var(--sd-text-3);
+      font-size: 0.9rem;
+    }
+
+    .pg-empty i {
+      font-size: 2rem;
+      margin-bottom: 0.75rem;
+      display: block;
+      opacity: 0.4;
+    }
+
+    /* .stat-card .mt-3 — hidden by JS after loading real data */
+    /* Using the class name the JS expects */
+    .stat-card .mt-3 { transition: opacity 0.3s; }
+
+    /* username span — used by JS querySelector('.username') */
+    .username { font-weight: 600; font-size: 0.88rem; color: var(--sd-text-2); }
+
+    /* responsive */
+    @media (max-width: 900px) {
+      .pg-two-col { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 700px) {
+      .pg-stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
+    }
+
+    @media (max-width: 450px) {
+      .pg-stats-grid { grid-template-columns: 1fr !important; }
+    }
+  </style>
+</head>
+
+<body class="sd-page">
+<div class="sd-shell">
+
+  <!-- ═══════════ SIDEBAR ═══════════ -->
+  <aside class="sd-sidebar" id="sd-sidebar" aria-label="Main navigation">
+
+    <a href="index.html" class="sd-sidebar-brand" aria-label="Alpharia home">
+      <div class="sd-brand-icon"><i class="fas fa-book-reader"></i></div>
+      <span class="sd-brand-text">Alpharia</span>
+    </a>
+
+    <nav class="sd-nav" aria-label="Dashboard navigation">
+      <span class="sd-nav-section-label">Main</span>
+
+      <a href="student-dashboard.html" class="sd-nav-link">
+        <i class="fas fa-home"></i><span>Overview</span>
+      </a>
+
+      <a href="student-tests.html" class="sd-nav-link">
+        <i class="fas fa-tasks"></i><span>My Tests</span>
+      </a>
+
+      <a href="student-progress.html" class="sd-nav-link active" aria-current="page">
+        <i class="fas fa-chart-line"></i><span>Progress</span>
+      </a>
+
+      <a href="take-reading-test.html" class="sd-nav-link">
+        <i class="fas fa-microphone-alt"></i><span>Take a Test</span>
+      </a>
+
+      <span class="sd-nav-section-label">Library</span>
+
+      <a href="#" class="sd-nav-link">
+        <i class="fas fa-book-open"></i><span>Resources</span>
+      </a>
+
+      <a href="student-achievements.html" class="sd-nav-link">
+        <i class="fas fa-trophy"></i><span>Achievements</span>
+      </a>
+
+      <span class="sd-nav-section-label">Account</span>
+
+      <a href="student-settings.html" class="sd-nav-link">
+        <i class="fas fa-cog"></i><span>Settings</span>
+      </a>
+    </nav>
+
+    <div class="sd-sidebar-footer">
+      <div class="sd-sidebar-user">
+        <img src="https://ui-avatars.com/api/?name=S&background=4f46e5&color=fff"
+             alt="User" class="sd-sidebar-avatar" id="sidebar-avatar">
+        <div class="sd-sidebar-user-info">
+          <!-- .username queried by JS: document.querySelector('.username') -->
+          <div class="sd-sidebar-user-name username" id="sidebar-username">Student</div>
+          <div class="sd-sidebar-user-role">Student</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Overlay (mobile) -->
+  <div class="sd-sidebar-overlay" id="sd-overlay" aria-hidden="true"></div>
+
+  <!-- ═══════════ MAIN ═══════════ -->
+  <div class="sd-main">
+
+    <!-- Top Bar -->
+    <header class="sd-topbar" role="banner">
+      <button class="sd-topbar-toggle" id="sd-menu-toggle" aria-label="Open navigation" aria-expanded="false">
+        <i class="fas fa-bars"></i>
+      </button>
+
+      <div class="sd-search" role="search">
+        <i class="fas fa-search" aria-hidden="true"></i>
+        <input type="text" placeholder="Search progress…" aria-label="Search">
+      </div>
+
+      <div class="sd-topbar-actions">
+        <button class="sd-icon-btn" aria-label="Notifications">
+          <i class="fas fa-bell"></i>
+          <span class="sd-notif-badge">0</span>
+        </button>
+        <div class="sd-avatar-btn">
+          <img src="https://ui-avatars.com/api/?name=S&background=4f46e5&color=fff"
+               alt="Avatar" id="user-avatar" width="38" height="38">
+        </div>
+      </div>
+    </header>
+
+    <!-- Body -->
+    <!-- .container-fluid — queried by JS for error prepend -->
+    <main class="sd-body container-fluid">
+
+      <!-- Page header -->
+      <div class="pg-header">
+        <h1 class="pg-title">My Progress</h1>
+        <div class="pg-period-group" role="group" aria-label="Time period">
+          <button class="pg-period-btn" data-period="week">This Week</button>
+          <button class="pg-period-btn active" data-period="month">This Month</button>
+          <button class="pg-period-btn" data-period="all">All Time</button>
+        </div>
+      </div>
+
+      <!-- ── STAT CARDS ── -->
+      <!-- .stat-card class kept for JS querySelector('.stat-card .mt-3') -->
+      <div class="pg-stats-grid" style="grid-template-columns:repeat(4,1fr);">
+
+        <div class="stat-card pg-stat" style="--stat-color:#4f46e5;--stat-bg:rgba(79,70,229,.1);">
+          <div class="pg-stat-icon"><i class="fas fa-check-circle"></i></div>
+          <div class="pg-stat-info">
+            <div class="pg-stat-label">Tests Completed</div>
+            <div class="pg-stat-value" id="tests-completed">—</div>
+            <div class="pg-stat-sub mt-3">All assessment attempts</div>
+          </div>
+        </div>
+
+        <div class="stat-card pg-stat" style="--stat-color:#10b981;--stat-bg:rgba(16,185,129,.1);">
+          <div class="pg-stat-icon"><i class="fas fa-chart-line"></i></div>
+          <div class="pg-stat-info">
+            <div class="pg-stat-label">Average Score</div>
+            <div class="pg-stat-value" id="average-score">—</div>
+            <div class="pg-stat-sub mt-3">Across all tests</div>
+          </div>
+        </div>
+
+        <div class="stat-card pg-stat" style="--stat-color:#8b5cf6;--stat-bg:rgba(139,92,246,.1);">
+          <div class="pg-stat-icon"><i class="fas fa-tachometer-alt"></i></div>
+          <div class="pg-stat-info">
+            <div class="pg-stat-label">Latest WPM</div>
+            <div class="pg-stat-value" id="latest-wpm">—</div>
+            <div class="pg-stat-sub" id="latest-fluency-label">Words per minute</div>
+          </div>
+        </div>
+
+        <div class="stat-card pg-stat" style="--stat-color:#f59e0b;--stat-bg:rgba(245,158,11,.1);">
+          <div class="pg-stat-icon"><i class="fas fa-trophy"></i></div>
+          <div class="pg-stat-info">
+            <div class="pg-stat-label">Points</div>
+            <div class="pg-stat-value" id="total-points">—</div>
+            <div class="pg-stat-sub" id="badges-count-label">0 badges earned</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── CHART + SKILLS ── -->
+      <div class="pg-two-col">
+
+        <!-- Performance chart -->
+        <div class="pg-chart-card">
+          <div class="pg-card-header">
+            <div class="pg-card-title">
+              <i class="fas fa-chart-area"></i>
+              Test Performance Over Time
+            </div>
+            <span style="font-size:0.78rem;color:var(--sd-text-3);">Last 10 attempts</span>
+          </div>
+          <div class="pg-card-body">
+            <div class="pg-chart-wrap">
+              <canvas id="performanceChart" aria-label="Test performance chart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Skill breakdown bars -->
+        <div class="pg-chart-card">
+          <div class="pg-card-header">
+            <div class="pg-card-title">
+              <i class="fas fa-brain"></i>
+              Skill Breakdown
+            </div>
+          </div>
+          <div class="pg-card-body">
+            <div class="pg-skill-row">
+              <div class="pg-skill-name">Letter Names</div>
+              <div class="pg-skill-bar"><div class="pg-skill-fill" id="skill-letters" style="width:0%;"></div></div>
+              <div class="pg-skill-pct" id="skill-letters-pct">—</div>
+            </div>
+            <div class="pg-skill-row">
+              <div class="pg-skill-name">Letter Sounds</div>
+              <div class="pg-skill-bar"><div class="pg-skill-fill" style="background:var(--sd-teal);width:0%;" id="skill-sounds"></div></div>
+              <div class="pg-skill-pct" id="skill-sounds-pct">—</div>
+            </div>
+            <div class="pg-skill-row">
+              <div class="pg-skill-name">Sight Words</div>
+              <div class="pg-skill-bar"><div class="pg-skill-fill" style="background:#f59e0b;width:0%;" id="skill-words"></div></div>
+              <div class="pg-skill-pct" id="skill-words-pct">—</div>
+            </div>
+            <div class="pg-skill-row">
+              <div class="pg-skill-name">Oral Reading</div>
+              <div class="pg-skill-bar"><div class="pg-skill-fill" style="background:#8b5cf6;width:0%;" id="skill-oral"></div></div>
+              <div class="pg-skill-pct" id="skill-oral-pct">—</div>
+            </div>
+            <div class="pg-skill-row">
+              <div class="pg-skill-name">Comprehension</div>
+              <div class="pg-skill-bar"><div class="pg-skill-fill" style="background:#ec4899;width:0%;" id="skill-comp"></div></div>
+              <div class="pg-skill-pct" id="skill-comp-pct">—</div>
+            </div>
+            <div class="pg-skill-row">
+              <div class="pg-skill-name">Fluency</div>
+              <div class="pg-skill-bar"><div class="pg-skill-fill" style="background:#6366f1;width:0%;" id="skill-fluency"></div></div>
+              <div class="pg-skill-pct" id="skill-fluency-pct">—</div>
+            </div>
+
+            <div style="margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid var(--sd-border);">
+              <div style="font-size:0.74rem;font-weight:700;color:var(--sd-text-3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:0.75rem;">
+                Current Reading Level
+              </div>
+              <div id="reading-level-display" style="font-size:1.2rem;font-weight:800;color:var(--sd-primary);letter-spacing:-0.5px;">
+                Loading…
+              </div>
+              <div style="font-size:0.78rem;color:var(--sd-text-3);margin-top:0.2rem;" id="reading-level-sub">
+                Based on your latest placement test
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── RECENT ACTIVITY ── -->
+      <div class="pg-chart-card">
+        <div class="pg-card-header">
+          <div class="pg-card-title">
+            <i class="fas fa-history"></i>
+            Recent Activity
+          </div>
+          <a href="student-tests.html" class="sd-btn sd-btn-outline" style="font-size:0.8rem;padding:0.4rem 0.9rem;">
+            View All Tests
+          </a>
+        </div>
+        <div class="pg-card-body" style="padding-top:0.25rem;">
+          <!-- .list-group queried by JS to inject activity items -->
+          <ul class="pg-activity-list list-group" id="activity-list">
+            <li style="text-align:center;padding:2rem;color:var(--sd-text-3);">
+              <div class="rt-spinner" style="margin:0 auto 0.75rem;"></div>
+              Loading activity…
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ── BADGES PROGRESS ── -->
+      <div class="pg-chart-card">
+        <div class="pg-card-header">
+          <div class="pg-card-title">
+            <i class="fas fa-trophy"></i>
+            Badge Collection
+          </div>
+          <a href="student-achievements.html" class="sd-btn sd-btn-outline" style="font-size:0.8rem;padding:0.4rem 0.9rem;">
+            View All
+          </a>
+        </div>
+        <div class="pg-card-body" id="badges-collection">
+          <!-- Badge progress bar -->
+          <div style="margin-bottom:1rem;" id="badge-progress-wrap">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.4rem;">
+              <span style="font-size:0.75rem;font-weight:700;color:var(--sd-text-3);text-transform:uppercase;letter-spacing:.05em;">Progress</span>
+              <span style="font-size:0.75rem;font-weight:700;color:var(--sd-primary);" id="badge-progress-label">0 / 10</span>
+            </div>
+            <div style="display:flex;gap:3px;" id="badge-progress-bar">
+              <div style="flex:1;height:6px;border-radius:50px;background:var(--sd-border);"></div>
+              <div style="flex:1;height:6px;border-radius:50px;background:var(--sd-border);"></div>
+              <div style="flex:1;height:6px;border-radius:50px;background:var(--sd-border);"></div>
+              <div style="flex:1;height:6px;border-radius:50px;background:var(--sd-border);"></div>
+              <div style="flex:1;height:6px;border-radius:50px;background:var(--sd-border);"></div>
+              <div style="flex:1;height:6px;border-radius:50px;background:var(--sd-border);"></div>
+              <div style="flex:1;height:6px;border-radius:50px;background:var(--sd-border);"></div>
+              <div style="flex:1;height:6px;border-radius:50px;background:var(--sd-border);"></div>
+              <div style="flex:1;height:6px;border-radius:50px;background:var(--sd-border);"></div>
+              <div style="flex:1;height:6px;border-radius:50px;background:var(--sd-border);"></div>
+            </div>
+          </div>
+          <!-- Badge grid injected by JS -->
+          <div style="text-align:center;padding:1rem;color:var(--sd-text-3);font-size:0.85rem;">Loading badges…</div>
+        </div>
+      </div>
+
+      <!-- ── LATEST RECOMMENDATIONS ── -->
+      <div class="pg-chart-card">
+        <div class="pg-card-header">
+          <div class="pg-card-title">
+            <i class="fas fa-robot"></i>
+            Alex's Recommendations
+          </div>
+        </div>
+        <div class="pg-card-body" id="progress-recs">
+          <div style="text-align:center;padding:1.5rem;color:var(--sd-text-3);font-size:0.85rem;">Complete a test to see recommendations.</div>
+        </div>
+      </div>
+
+    </main>
+  </div><!-- /sd-main -->
+</div><!-- /sd-shell -->
+
+
+<!-- ══════════════════════════════════
+     SCRIPTS
+══════════════════════════════════ -->
+
+<!-- Sidebar toggle -->
+<script>
+(function () {
+  var sidebar = document.getElementById('sd-sidebar');
+  var overlay = document.getElementById('sd-overlay');
+  var toggle  = document.getElementById('sd-menu-toggle');
+
+  function open()  { sidebar.classList.add('open'); overlay.classList.add('open'); toggle.setAttribute('aria-expanded','true'); document.body.style.overflow='hidden'; }
+  function close() { sidebar.classList.remove('open'); overlay.classList.remove('open'); toggle.setAttribute('aria-expanded','false'); document.body.style.overflow=''; }
+
+  if (toggle)  toggle.addEventListener('click', function () { sidebar.classList.contains('open') ? close() : open(); });
+  if (overlay) overlay.addEventListener('click', close);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+
+  /* Period buttons (UI only — real filter logic can be added in the module script) */
+  document.querySelectorAll('.pg-period-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('.pg-period-btn').forEach(function (b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+    });
+  });
+
+  /* Mini inline spinner style */
+  var style = document.createElement('style');
+  style.textContent = '.rt-spinner{width:26px;height:26px;border:3px solid #e2e8f0;border-top-color:#4f46e5;border-radius:50%;animation:sp 0.8s linear infinite;}@keyframes sp{to{transform:rotate(360deg)}}';
+  document.head.appendChild(style);
+})();
+</script>
+
+<!-- Firebase + Data Logic (original JS fully preserved + enhanced UI output) -->
+<script type="module">
+  import { app, auth, db } from './js/firebase-config.js';
+  import { requireAuth } from './js/auth-check.js';
+  import {
+    doc, getDoc, collection, query, orderBy, getDocs
+  } from 'https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js';
+
+  let performanceChart;
+  let testAttempts = [];
+
+  window.initializeChart = initializeChart;
+
+  /* ── Helpers ── */
+  function formatDate(timestamp) {
+    if (!timestamp) return '';
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  }
+
+  function timeAgo(timestamp) {
+    if (!timestamp) return '';
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    const seconds = Math.floor((new Date() - date) / 1000);
+    let interval = Math.floor(seconds / 31536000);
+    if (interval > 1) return interval + ' years ago';
+    if (interval === 1) return '1 year ago';
+    interval = Math.floor(seconds / 2592000);
+    if (interval > 1) return interval + ' months ago';
+    if (interval === 1) return '1 month ago';
+    interval = Math.floor(seconds / 86400);
+    if (interval > 1) return interval + ' days ago';
+    if (interval === 1) return '1 day ago';
+    interval = Math.floor(seconds / 3600);
+    if (interval > 1) return interval + ' hours ago';
+    if (interval === 1) return '1 hour ago';
+    interval = Math.floor(seconds / 60);
+    if (interval > 1) return interval + ' minutes ago';
+    return 'Just now';
+  }
+
+  /* ── Chart ── */
+  function initializeChart(labels = [], scores = []) {
+    const ctx = document.getElementById('performanceChart').getContext('2d');
+    if (performanceChart) performanceChart.destroy();
+
+    const primary = '#4f46e5';
+    const teal    = '#14b8a6';
+    const bestScore = scores.length > 0 ? Math.max(...scores) : 0;
+    const avgScore = scores.length > 0 ? Math.round(scores.reduce((a,b) => a+b, 0) / scores.length) : 0;
+
+    performanceChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Test Scores',
+          data: scores,
+          borderColor: primary,
+          backgroundColor: 'rgba(79,70,229,0.07)',
+          tension: 0.4,
+          fill: true,
+          pointBackgroundColor: scores.map(s => s === bestScore && scores.length > 1 ? '#10b981' : primary),
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: scores.map(s => s === bestScore && scores.length > 1 ? 6 : 4),
+          pointHoverRadius: 7,
+          pointHoverBackgroundColor: teal,
+          pointHitRadius: 12
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#1e293b',
+            titleColor: '#94a3b8',
+            bodyColor: '#f1f5f9',
+            padding: 12,
+            cornerRadius: 10,
+            callbacks: {
+              label: ctx => {
+                let label = ` Score: ${ctx.parsed.y}%`;
+                if (ctx.parsed.y === bestScore && scores.length > 1) label += ' ⭐ Best';
+                return label;
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: 100,
+            grid: { color: 'rgba(148,163,184,0.1)' },
+            ticks: {
+              color: '#94a3b8',
+              font: { family: 'Inter', size: 11 },
+              callback: v => v + '%'
+            }
+          },
+          x: {
+            grid: { display: false },
+            ticks: { color: '#94a3b8', font: { family: 'Inter', size: 11 } }
+          }
+        }
+      }
+    });
+  }
+
+  /* ── updateStats — IDs preserved from original ── */
+  function updateStats(attempts) {
+    if (!attempts || attempts.length === 0) return;
+
+    const totalTests   = attempts.length;
+    const totalScore   = attempts.reduce((s, a) => s + (parseFloat(a.percentage) || 0), 0);
+    const averageScore = Math.round(totalScore / totalTests);
+
+    document.getElementById('tests-completed').textContent = totalTests;
+    document.getElementById('average-score').textContent   = `${averageScore}%`;
+
+    // JS hides these in original
+    document.querySelectorAll('.stat-card .mt-3').forEach(el => { el.style.display = 'none'; });
+
+    // Colour average score
+    const avgEl = document.getElementById('average-score');
+    if (avgEl) {
+      avgEl.style.color = averageScore >= 70 ? 'var(--sd-green)' : averageScore >= 50 ? 'var(--sd-amber)' : 'var(--sd-red)';
+    }
+  }
+
+  function setSkillBar(barId, pctId, value) {
+    const bar = document.getElementById(barId);
+    const pct = document.getElementById(pctId);
+    if (bar) setTimeout(() => { bar.style.width = value + '%'; }, 300);
+    if (pct) pct.textContent = value + '%';
+  }
+
+  /* ── updateRecentActivity — .list-group preserved ── */
+  function updateRecentActivity(attempts) {
+    const activityContainer = document.querySelector('.list-group');
+    if (!activityContainer) return;
+
+    const sorted = [...attempts].sort((a, b) => {
+      const dA = a.submittedAt ? (a.submittedAt.toDate ? a.submittedAt.toDate() : new Date(a.submittedAt)) : new Date(0);
+      const dB = b.submittedAt ? (b.submittedAt.toDate ? b.submittedAt.toDate() : new Date(b.submittedAt)) : new Date(0);
+      return dB - dA;
+    }).slice(0, 8);
+
+    activityContainer.innerHTML = '';
+
+    if (sorted.length === 0) {
+      activityContainer.innerHTML = `
+        <li class="pg-empty">
+          <i class="fas fa-history"></i>
+          No test attempts yet. Complete a test to see your activity here.
+        </li>`;
+      return;
+    }
+
+    sorted.forEach(attempt => {
+      const score     = attempt.percentage ? Math.round(attempt.percentage) : null;
+      const scoreText = score !== null ? `${score}%` : 'N/A';
+      const scoreCls  = score === null ? '' : score >= 70 ? 'style="color:var(--sd-green)"' : score >= 50 ? 'style="color:var(--sd-amber)"' : 'style="color:var(--sd-red)"';
+      const testTitle = attempt.testTitle || 'Untitled Test';
+      const timeText  = attempt.submittedAt ? timeAgo(attempt.submittedAt) : '';
+      const dateText  = attempt.submittedAt ? formatDate(attempt.submittedAt) : 'Unknown date';
+
+      const li = document.createElement('li');
+      li.className = 'pg-activity-item list-group-item';
+      li.innerHTML = `
+        <div class="pg-act-icon"><i class="fas fa-file-alt"></i></div>
+        <div class="pg-act-main">
+          <div class="pg-act-title">Completed: ${testTitle}</div>
+          <div class="pg-act-sub">${getScoreFeedback(attempt.percentage)} · ${dateText}</div>
+        </div>
+        <div class="pg-act-right">
+          <span class="pg-act-score" ${scoreCls}>${scoreText}</span>
+          <span class="pg-act-time">${timeText}</span>
+        </div>`;
+      activityContainer.appendChild(li);
+    });
+  }
+
+  function getScoreFeedback(percentage) {
+    if (!percentage && percentage !== 0) return 'No score available';
+    if (percentage >= 90) return 'Excellent work!';
+    if (percentage >= 80) return 'Great job!';
+    if (percentage >= 70) return 'Good effort!';
+    if (percentage >= 60) return 'Keep practicing!';
+    return 'You can do better with more practice!';
+  }
+
+  /* ── Update reading level from results collection ── */
+  async function loadReadingLevel(userId) {
+    try {
+      const resultsSnap = await getDocs(
+        query(collection(db, 'results'), orderBy('timestamp', 'desc'))
+      );
+      const myResults = resultsSnap.docs
+        .map(d => d.data())
+        .filter(r => r.userId === userId);
+
+      if (myResults.length > 0) {
+        const latest = myResults[0];
+        const level  = (latest.placedLevel || '').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        const lvlEl  = document.getElementById('reading-level-display');
+        const subEl  = document.getElementById('reading-level-sub');
+        if (lvlEl) lvlEl.textContent = level || 'Not assessed yet';
+        if (subEl) subEl.textContent = `${latest.oralClassification || ''} · Comprehension: ${latest.comprehensionPercent || 0}%`;
+      } else {
+        const lvlEl = document.getElementById('reading-level-display');
+        if (lvlEl) lvlEl.textContent = 'Not assessed yet';
+      }
+    } catch (e) {
+      const lvlEl = document.getElementById('reading-level-display');
+      if (lvlEl) lvlEl.textContent = 'Not available';
+    }
+  }
+
+  /* ── Main init ── */
+  document.addEventListener('DOMContentLoaded', async function () {
+    initializeChart([], []);
+
+    try {
+      const { user } = await requireAuth(['student']);
+
+      /* User profile */
+      const userDocRef = doc(db, 'students', user.uid);
+      const userDoc    = await getDoc(userDocRef);
+
+      if (userDoc.exists()) {
+        const userData    = userDoc.data();
+        const displayName = userData.displayName || userData.name || 'Student';
+
+        /* .username — queried by original JS */
+        const usernameEl = document.querySelector('.username');
+        if (usernameEl) usernameEl.textContent = displayName;
+
+        const avatarSrc = userData.photoURL || user.photoURL ||
+          `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=4f46e5&color=fff`;
+        const avatarEl   = document.getElementById('user-avatar');
+        const sidebarAvt = document.getElementById('sidebar-avatar');
+        if (avatarEl)   avatarEl.src   = avatarSrc;
+        if (sidebarAvt) sidebarAvt.src = avatarSrc;
+      }
+
+      /* Test attempts */
+      const attemptsRef  = collection(db, 'students', user.uid, 'testAttempts');
+      const q            = query(attemptsRef, orderBy('submittedAt', 'desc'));
+      const snap         = await getDocs(q);
+
+      testAttempts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+      updateStats(testAttempts);
+      updateRecentActivity(testAttempts);
+
+      /* Chart */
+      const recent = [...testAttempts].sort((a, b) => {
+        const dA = a.submittedAt ? (a.submittedAt.toDate ? a.submittedAt.toDate() : new Date(a.submittedAt)) : new Date(0);
+        const dB = b.submittedAt ? (b.submittedAt.toDate ? b.submittedAt.toDate() : new Date(b.submittedAt)) : new Date(0);
+        return dA - dB;
+      }).slice(-10);
+
+      const labels = recent.map((a, i) => {
+        if (!a.submittedAt) return `Test ${i + 1}`;
+        const d = a.submittedAt.toDate ? a.submittedAt.toDate() : new Date(a.submittedAt);
+        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      });
+      const scores = recent.map(a => Math.round(parseFloat(a.percentage) || 0));
+
+      initializeChart(labels, scores);
+
+      /* Reading level + real skill bars + gamification + fluency */
+      await loadReadingLevel(user.uid);
+      await loadResultsData(user.uid);
+      await loadGamificationProgress(user.uid);
+
+    } catch (error) {
+      console.error('Error loading student data:', error);
+      const errorEl = document.createElement('div');
+      errorEl.className = 'alert alert-danger';
+      errorEl.style.cssText = 'background:rgba(239,68,68,.1);color:#dc2626;border:1px solid rgba(239,68,68,.25);border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem;font-size:0.88rem;font-weight:500;';
+      errorEl.textContent = 'Error loading your progress data. Please try again later.';
+      /* .container-fluid queried by original JS */
+      document.querySelector('.container-fluid').prepend(errorEl);
+    }
+  });
+
+  /* ── Load real results data for skill bars, fluency, and recommendations ── */
+  async function loadResultsData(userId) {
+    try {
+      const resultsSnap = await getDocs(
+        query(collection(db, 'results'), orderBy('timestamp', 'desc'))
+      );
+      const myResults = resultsSnap.docs
+        .map(d => d.data())
+        .filter(r => r.userId === userId);
+
+      if (myResults.length === 0) return;
+      const latest = myResults[0];
+
+      // --- Skill bars from latest result logs ---
+      const logs = latest.logs || {};
+
+      // Letters
+      if (logs.letters && logs.letters.length > 0) {
+        const names = logs.letters.filter(l => l.step === 'name');
+        const sounds = logs.letters.filter(l => l.step === 'sound');
+        const namesPct = names.length > 0 ? Math.round(names.filter(l => l.status === 'correct').length / names.length * 100) : 0;
+        const soundsPct = sounds.length > 0 ? Math.round(sounds.filter(l => l.status === 'correct').length / sounds.length * 100) : 0;
+        setSkillBar('skill-letters', 'skill-letters-pct', namesPct);
+        setSkillBar('skill-sounds', 'skill-sounds-pct', soundsPct);
+      }
+
+      // Words
+      if (logs.words && logs.words.length > 0) {
+        const wordsPct = Math.round(logs.words.filter(l => l.status === 'correct').length / logs.words.length * 100);
+        setSkillBar('skill-words', 'skill-words-pct', wordsPct);
+      }
+
+      // Oral Reading
+      const oralPct = latest.oralClassification === 'Independent' ? 95
+        : latest.oralClassification === 'Instructional' ? 70 : 40;
+      setSkillBar('skill-oral', 'skill-oral-pct', oralPct);
+
+      // Comprehension
+      setSkillBar('skill-comp', 'skill-comp-pct', latest.comprehensionPercent || 0);
+
+      // Fluency
+      if (latest.fluency) {
+        const f = latest.fluency;
+        // Normalize WPM to 0-100 scale (cap at 150 WPM)
+        const fluencyPct = Math.min(100, Math.round((f.wordsPerMinute || 0) / 1.5));
+        setSkillBar('skill-fluency', 'skill-fluency-pct', `${f.wordsPerMinute || 0} wpm`);
+        const fluencyBar = document.getElementById('skill-fluency');
+        if (fluencyBar) setTimeout(() => { fluencyBar.style.width = fluencyPct + '%'; }, 300);
+
+        // Update WPM stat card
+        const wpmEl = document.getElementById('latest-wpm');
+        const fluencyLabel = document.getElementById('latest-fluency-label');
+        if (wpmEl) wpmEl.textContent = f.wordsPerMinute || 0;
+        if (fluencyLabel) {
+          const fluencyColor = f.classification === 'Fluent' ? 'var(--sd-green)' : f.classification === 'Developing' ? 'var(--sd-amber)' : 'var(--sd-red)';
+          fluencyLabel.innerHTML = `<span style="color:${fluencyColor};font-weight:700;">${f.classification || 'N/A'}</span> · ${f.accuracyRate || 0}% accuracy`;
+        }
+      }
+
+      // --- Recommendations ---
+      const recsContainer = document.getElementById('progress-recs');
+      if (recsContainer && latest.recommendations && latest.recommendations.length > 0) {
+        const colors = { high: '#ef4444', medium: '#f59e0b', low: '#10b981' };
+        const icons = { high: 'exclamation-triangle', medium: 'info-circle', low: 'lightbulb' };
+        recsContainer.innerHTML = latest.recommendations.map(r => `
+          <div style="display:flex;align-items:flex-start;gap:0.7rem;padding:0.75rem 0;border-bottom:1px solid var(--sd-border);">
+            <i class="fas fa-${icons[r.priority] || 'info-circle'}" style="color:${colors[r.priority] || '#64748b'};margin-top:2px;flex-shrink:0;"></i>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:0.85rem;font-weight:700;color:var(--sd-text);">${r.title}</div>
+              <div style="font-size:0.76rem;color:var(--sd-text-3);line-height:1.4;margin-top:0.15rem;">${r.detail}</div>
+            </div>
+            <span style="font-size:0.6rem;font-weight:700;color:${colors[r.priority] || '#64748b'};background:${colors[r.priority] || '#64748b'}12;padding:0.2rem 0.45rem;border-radius:50px;white-space:nowrap;flex-shrink:0;text-transform:uppercase;">${r.priority === 'high' ? 'Priority' : r.priority === 'medium' ? 'Suggested' : 'Bonus'}</span>
+          </div>
+        `).join('');
+      }
+    } catch (e) {
+      console.error('Error loading results data:', e);
+    }
+  }
+
+  /* ── Load gamification for progress page ── */
+  async function loadGamificationProgress(userId) {
+    try {
+      const gamDoc = await getDoc(doc(db, 'students', userId, 'gamification', 'profile'));
+      const container = document.getElementById('badges-collection');
+      const pointsEl = document.getElementById('total-points');
+      const badgesLabel = document.getElementById('badges-count-label');
+
+      if (!gamDoc.exists()) {
+        if (container) container.innerHTML = `<div style="text-align:center;padding:1.5rem;color:var(--sd-text-3);font-size:0.85rem;"><i class="fas fa-trophy" style="font-size:1.5rem;opacity:0.3;display:block;margin-bottom:0.5rem;"></i>No badges yet. Take a test to start earning!</div>`;
+        return;
+      }
+
+      const data = gamDoc.data();
+      const badges = data.badges || [];
+      const totalPoints = data.totalPoints || 0;
+
+      if (pointsEl) pointsEl.textContent = totalPoints.toLocaleString();
+      if (badgesLabel) badgesLabel.textContent = `${badges.length} badge${badges.length !== 1 ? 's' : ''} earned`;
+
+      // Animate segmented badge progress bar
+      const progressBar = document.getElementById('badge-progress-bar');
+      const progressLabel = document.getElementById('badge-progress-label');
+      if (progressLabel) progressLabel.textContent = `${badges.length} / 10`;
+      if (progressBar) {
+        const segments = progressBar.children;
+        for (let i = 0; i < segments.length; i++) {
+          if (i < badges.length) {
+            setTimeout(() => {
+              segments[i].style.background = 'linear-gradient(90deg, #4f46e5, #818cf8)';
+              segments[i].style.transition = 'background 0.3s ease';
+            }, i * 80);
+          }
+        }
+      }
+
+      // All possible badges for locked display
+      const ALL_BADGE_IDS = [
+        { id: 'first_steps', name: 'First Steps', emoji: '🎯', color: '#4f46e5' },
+        { id: 'letter_master', name: 'Letter Master', emoji: '🔤', color: '#10b981' },
+        { id: 'sound_expert', name: 'Sound Expert', emoji: '🔊', color: '#14b8a6' },
+        { id: 'word_wizard', name: 'Word Wizard', emoji: '✨', color: '#8b5cf6' },
+        { id: 'speed_reader', name: 'Speed Reader', emoji: '⚡', color: '#f59e0b' },
+        { id: 'sharp_eye', name: 'Sharp Eye', emoji: '🎯', color: '#10b981' },
+        { id: 'comprehension_star', name: 'Comp. Star', emoji: '🧠', color: '#ec4899' },
+        { id: 'fluent_reader', name: 'Fluent Reader', emoji: '📖', color: '#059669' },
+        { id: 'brave_voice', name: 'Brave Voice', emoji: '🎤', color: '#6366f1' },
+        { id: 'perfect_score', name: 'Perfect Score', emoji: '🏆', color: '#f59e0b' }
+      ];
+      const earnedIds = new Set(badges.map(b => b.id));
+
+      if (container) {
+        container.innerHTML = `
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(85px,1fr));gap:0.6rem;">
+            ${ALL_BADGE_IDS.map(def => {
+              const earned = earnedIds.has(def.id);
+              const b = badges.find(b => b.id === def.id) || def;
+              return `
+                <div style="text-align:center;padding:0.6rem 0.3rem;border-radius:12px;border:1.5px solid ${earned ? def.color + '30' : 'var(--sd-border)'};background:${earned ? def.color + '08' : 'transparent'};opacity:${earned ? '1' : '0.35'};transition:var(--sd-transition);">
+                  <div style="font-size:1.4rem;">${def.emoji}</div>
+                  <div style="font-size:0.6rem;font-weight:700;color:${earned ? def.color : 'var(--sd-text-3)'};margin-top:0.15rem;">${def.name}</div>
+                  ${earned ? '<div style="font-size:0.5rem;color:var(--sd-primary);margin-top:0.1rem;">✓ Earned</div>' : '<div style="font-size:0.5rem;color:var(--sd-text-3);margin-top:0.1rem;"><i class="fas fa-lock" style="font-size:0.45rem;"></i> Locked</div>'}
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+      }
+    } catch (e) {
+      console.error('Error loading gamification progress:', e);
+    }
+  }
+</script>
+
+</body>
+</html>

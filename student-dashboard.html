@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Dashboard — Alpharia</title>
+  <meta name="description" content="Your personal reading dashboard — track tests, scores, and progress.">
+
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Dashboard Styles -->
+  <link rel="stylesheet" href="css/student-dashboard-clean.css">
+</head>
+<body class="sd-page">
+
+<!-- ╔══════════════════════════════════════╗
+     ║  LAYOUT SHELL                       ║
+     ╚══════════════════════════════════════╝ -->
+<div class="sd-shell">
+
+  <!-- ═══════════ SIDEBAR ═══════════ -->
+  <aside class="sd-sidebar" id="sd-sidebar" aria-label="Main navigation">
+
+    <!-- Brand -->
+    <a href="index.html" class="sd-sidebar-brand" aria-label="Alpharia home">
+      <div class="sd-brand-icon"><i class="fas fa-book-reader"></i></div>
+      <span class="sd-brand-text">Alpharia</span>
+    </a>
+
+    <!-- Nav -->
+    <nav class="sd-nav" aria-label="Dashboard navigation">
+      <span class="sd-nav-section-label">Main</span>
+
+      <a href="student-dashboard.html" class="sd-nav-link active" aria-current="page">
+        <i class="fas fa-home"></i>
+        <span>Overview</span>
+      </a>
+
+      <a href="student-tests.html" class="sd-nav-link">
+        <i class="fas fa-tasks"></i>
+        <span>My Tests</span>
+        <span class="sd-nav-badge" id="sd-badge-tests">—</span>
+      </a>
+
+      <a href="student-progress.html" class="sd-nav-link">
+        <i class="fas fa-chart-line"></i>
+        <span>Progress</span>
+      </a>
+
+      <a href="take-reading-test.html" class="sd-nav-link">
+        <i class="fas fa-microphone-alt"></i>
+        <span>Take a Test</span>
+      </a>
+
+      <span class="sd-nav-section-label">Library</span>
+
+      <a href="reading-practice.html" class="sd-nav-link">
+        <i class="fas fa-book-open"></i>
+        <span>Reading Practice</span>
+      </a>
+
+      <a href="student-achievements.html" class="sd-nav-link">
+        <i class="fas fa-trophy"></i>
+        <span>Achievements</span>
+      </a>
+
+      <span class="sd-nav-section-label">Account</span>
+
+      <a href="student-settings.html" class="sd-nav-link">
+        <i class="fas fa-cog"></i>
+        <span>Settings</span>
+      </a>
+    </nav>
+
+    <!-- Sidebar footer: user info -->
+    <div class="sd-sidebar-footer">
+      <div class="sd-sidebar-user" title="Your account">
+        <img src="" alt="User" class="sd-sidebar-avatar" id="sd-sidebar-avatar">
+        <div class="sd-sidebar-user-info">
+          <div class="sd-sidebar-user-name" id="sd-sidebar-name">Loading…</div>
+          <div class="sd-sidebar-user-role">Student</div>
+        </div>
+        </div>
+      </div>
+  </aside>
+
+  <!-- Sidebar overlay (mobile) -->
+  <div class="sd-sidebar-overlay" id="sd-overlay" aria-hidden="true"></div>
+
+  <!-- ═══════════ MAIN ═══════════ -->
+  <div class="sd-main">
+
+    <!-- Top Bar -->
+    <header class="sd-topbar" role="banner">
+      <button class="sd-topbar-toggle" id="sd-menu-toggle" aria-label="Open navigation" aria-expanded="false">
+        <i class="fas fa-bars"></i>
+      </button>
+
+      <div class="sd-search" role="search">
+        <i class="fas fa-search" aria-hidden="true"></i>
+        <input type="text" id="search-input" placeholder="Search tests, resources…" aria-label="Search">
+      </div>
+
+      <div class="sd-topbar-actions">
+        <button class="sd-icon-btn" aria-label="Notifications" title="Notifications">
+          <i class="fas fa-bell"></i>
+          <span class="sd-notif-badge" aria-label="3 notifications">3</span>
+        </button>
+
+        <div class="sd-avatar-btn" title="Your profile">
+          <img src="" alt="User avatar" id="user-avatar" width="38" height="38">
+        </div>
+      </div>
+    </header>
+
+    <!-- Page Body -->
+    <main class="sd-body" id="main-content">
+
+      <!-- ── Welcome Hero ── -->
+      <section class="sd-welcome" aria-labelledby="welcome-heading">
+        <div class="sd-welcome-text">
+          <div class="sd-welcome-eyebrow" id="greet-eyebrow">
+            <i class="fas fa-sun" style="margin-right:4px;" id="greet-icon"></i>
+            <span id="greet-text">Good day!</span>
+          </div>
+          <h1 class="sd-welcome-h1" id="welcome-heading">
+            Welcome back, <span id="user-name">Student</span>!
+          </h1>
+          <p class="sd-welcome-sub">
+            You have <strong id="upcoming-tests-count" style="color:#a5b4fc;">0 upcoming tests</strong>.
+            <span id="motivational-msg">Keep reading — every session makes you stronger!</span>
+          </p>
+          <div class="sd-welcome-actions">
+            <a href="take-reading-test.html" class="sd-btn sd-btn-primary">
+              <i class="fas fa-play"></i> Start Reading Test
+            </a>
+            <button id="sign-out-btn" class="sd-btn sd-btn-ghost">
+              <i class="fas fa-sign-out-alt"></i> Sign Out
+            </button>
+          </div>
+        </div>
+
+        <!-- Mini dashboard cards -->
+        <div class="sd-welcome-visual" aria-hidden="true">
+          <div class="sd-mini-card">
+            <div class="sd-mini-card-icon mc-blue"><i class="fas fa-check-circle"></i></div>
+            <div>
+              <div class="sd-mini-card-label">Tests Done</div>
+              <div class="sd-mini-card-val" id="wc-tests">—</div>
+            </div>
+          </div>
+          <div class="sd-mini-card">
+            <div class="sd-mini-card-icon mc-teal"><i class="fas fa-chart-bar"></i></div>
+            <div>
+              <div class="sd-mini-card-label">Avg. Score</div>
+              <div class="sd-mini-card-val" id="wc-score">—</div>
+            </div>
+          </div>
+          <div class="sd-mini-card">
+            <div class="sd-mini-card-icon mc-green"><i class="fas fa-star"></i></div>
+            <div>
+              <div class="sd-mini-card-label">Points</div>
+              <div class="sd-mini-card-val" id="wc-streak">—</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Stat Cards ── -->
+      <div class="sd-stats-grid" role="region" aria-label="Quick statistics">
+
+        <div class="sd-stat">
+          <div class="sd-stat-icon stat-purple"><i class="fas fa-check-double"></i></div>
+          <div class="sd-stat-body">
+            <div class="sd-stat-label">Completed Tests</div>
+            <div class="sd-stat-value" id="stat-completed">—</div>
+            <div class="sd-stat-trend trend-up">
+              <i class="fas fa-arrow-up"></i> All time
+            </div>
+          </div>
+        </div>
+
+        <div class="sd-stat">
+          <div class="sd-stat-icon stat-teal"><i class="fas fa-percent"></i></div>
+          <div class="sd-stat-body">
+            <div class="sd-stat-label">Average Score</div>
+            <div class="sd-stat-value" id="stat-avg">—</div>
+            <div class="sd-stat-trend trend-flat">
+              <i class="fas fa-minus"></i> Across all tests
+            </div>
+          </div>
+        </div>
+
+        <div class="sd-stat">
+          <div class="sd-stat-icon stat-amber"><i class="fas fa-calendar-alt"></i></div>
+          <div class="sd-stat-body">
+            <div class="sd-stat-label">Upcoming Tests</div>
+            <div class="sd-stat-value" id="stat-upcoming">—</div>
+            <div class="sd-stat-trend trend-flat">
+              <i class="fas fa-clock"></i> Active now
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── Two-column content ── -->
+      <div class="sd-content-grid">
+
+        <!-- Recent Tests Card -->
+        <div class="sd-card" role="region" aria-labelledby="recent-heading">
+          <div class="sd-card-header">
+            <div class="sd-card-title" id="recent-heading">
+              <i class="fas fa-history" aria-hidden="true"></i>
+              Recent Tests
+            </div>
+            <a href="student-tests.html" class="sd-card-link">
+              View all <i class="fas fa-arrow-right"></i>
+            </a>
+          </div>
+          <div class="sd-card-body" id="recent-tests-list">
+            <!-- Skeleton placeholders -->
+            <div class="sd-test-item" aria-hidden="true">
+              <div class="sd-skeleton" style="width:36px;height:36px;border-radius:9px;flex-shrink:0;"></div>
+              <div style="flex:1;">
+                <div class="sd-skeleton" style="height:14px;width:60%;margin-bottom:8px;"></div>
+                <div class="sd-skeleton" style="height:11px;width:40%;"></div>
+              </div>
+            </div>
+            <div class="sd-test-item" aria-hidden="true">
+              <div class="sd-skeleton" style="width:36px;height:36px;border-radius:9px;flex-shrink:0;"></div>
+              <div style="flex:1;">
+                <div class="sd-skeleton" style="height:14px;width:70%;margin-bottom:8px;"></div>
+                <div class="sd-skeleton" style="height:11px;width:35%;"></div>
+              </div>
+            </div>
+            <div class="sd-test-item" aria-hidden="true">
+              <div class="sd-skeleton" style="width:36px;height:36px;border-radius:9px;flex-shrink:0;"></div>
+              <div style="flex:1;">
+                <div class="sd-skeleton" style="height:14px;width:50%;margin-bottom:8px;"></div>
+                <div class="sd-skeleton" style="height:11px;width:45%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Upcoming / Quick Actions -->
+        <div style="display:flex;flex-direction:column;gap:1.25rem;">
+
+          <!-- Upcoming tests -->
+          <div class="sd-card" role="region" aria-labelledby="upcoming-heading">
+            <div class="sd-card-header">
+              <div class="sd-card-title" id="upcoming-heading">
+                <i class="fas fa-calendar-check" aria-hidden="true"></i>
+                Upcoming Tests
+              </div>
+            </div>
+            <div class="sd-card-body" id="upcoming-tests-list">
+              <div class="sd-empty" aria-busy="true">
+                <div class="sd-empty-icon"><i class="fas fa-hourglass-half"></i></div>
+                <div class="sd-empty-title">Loading…</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick actions -->
+          <div class="sd-card" role="complementary" aria-label="Quick actions">
+            <div class="sd-card-header">
+              <div class="sd-card-title">
+                <i class="fas fa-bolt" aria-hidden="true"></i>
+                Quick Actions
+              </div>
+            </div>
+            <div class="sd-card-body" style="display:flex;flex-direction:column;gap:0.65rem;">
+              <a href="take-reading-test.html" class="sd-btn sd-btn-primary" style="justify-content:center;">
+                <i class="fas fa-microphone-alt"></i> Start Reading Assessment
+              </a>
+              <a href="student-progress.html" class="sd-btn sd-btn-outline" style="justify-content:center;">
+                <i class="fas fa-chart-line"></i> View My Progress
+              </a>
+              <a href="student-tests.html" class="sd-btn sd-btn-outline" style="justify-content:center;">
+                <i class="fas fa-tasks"></i> Browse All Tests
+              </a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── Gamification & Fluency Row ── -->
+      <div class="sd-content-grid">
+
+        <!-- Badges + Points Card -->
+        <div class="sd-card" role="region" aria-labelledby="badges-heading">
+          <div class="sd-card-header">
+            <div class="sd-card-title" id="badges-heading">
+              <i class="fas fa-trophy" aria-hidden="true"></i>
+              My Badges
+            </div>
+            <a href="student-achievements.html" class="sd-card-link">
+              View all <i class="fas fa-arrow-right"></i>
+            </a>
+          </div>
+          <div class="sd-card-body" id="dashboard-badges">
+            <div style="text-align:center;padding:1.5rem;color:var(--sd-text-3);font-size:0.85rem;">
+              <i class="fas fa-trophy" style="font-size:1.5rem;opacity:0.3;display:block;margin-bottom:0.5rem;"></i>
+              Loading badges…
+            </div>
+          </div>
+        </div>
+
+        <!-- Latest Fluency + Recommendations Card -->
+        <div style="display:flex;flex-direction:column;gap:1.25rem;">
+
+          <!-- Fluency Snapshot -->
+          <div class="sd-card" role="region" aria-labelledby="fluency-heading">
+            <div class="sd-card-header">
+              <div class="sd-card-title" id="fluency-heading">
+                <i class="fas fa-tachometer-alt" aria-hidden="true"></i>
+                Latest Fluency
+              </div>
+            </div>
+            <div class="sd-card-body" id="dashboard-fluency">
+              <div style="text-align:center;padding:1rem;color:var(--sd-text-3);font-size:0.85rem;">
+                Complete a reading assessment to see fluency data.
+              </div>
+            </div>
+          </div>
+
+          <!-- Top Recommendations -->
+          <div class="sd-card" role="region" aria-labelledby="recs-heading">
+            <div class="sd-card-header">
+              <div class="sd-card-title" id="recs-heading">
+                <i class="fas fa-robot" aria-hidden="true"></i>
+                Alex's Tips
+              </div>
+            </div>
+            <div class="sd-card-body" id="dashboard-recs">
+              <div style="text-align:center;padding:1rem;color:var(--sd-text-3);font-size:0.85rem;">
+                Tips will appear after your first assessment.
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </main><!-- /sd-body -->
+  </div><!-- /sd-main -->
+</div><!-- /sd-shell -->
+
+
+<!-- ══════════════════════════════════════
+     TEST DETAILS MODAL
+══════════════════════════════════════ -->
+<div class="sd-modal-backdrop" id="test-details-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="sd-modal" id="sd-modal-box">
+
+    <div class="sd-modal-header">
+      <div class="sd-modal-title" id="modal-title">
+        <i class="fas fa-clipboard-list"></i>
+        <span id="test-details-title">Test Details</span>
+      </div>
+      <button class="sd-modal-close" onclick="closeTestDetailsModal()" aria-label="Close">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="sd-modal-body">
+      <!-- Score summary -->
+      <div class="sd-score-summary">
+        <div class="sd-score-box">
+          <div class="sd-score-box-label">Score</div>
+          <div class="sd-score-box-val" id="test-total-score">—</div>
+        </div>
+        <div class="sd-score-box">
+          <div class="sd-score-box-label">Max Score</div>
+          <div class="sd-score-box-val" id="test-total-possible">—</div>
+        </div>
+        <div class="sd-score-box">
+          <div class="sd-score-box-label">Overall</div>
+          <div class="sd-score-box-val" id="test-percentage" style="color:var(--sd-primary);">—%</div>
+        </div>
+      </div>
+
+      <!-- Section breakdown -->
+      <div style="font-size:0.82rem;font-weight:700;color:var(--sd-text-3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.75rem;">
+        Section Breakdown
+      </div>
+      <div id="sections-summary">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+    <div class="sd-modal-footer">
+      <button class="sd-btn sd-btn-outline" id="closeTestDetailsBtn" onclick="closeTestDetailsModal()">
+        Close
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     SCRIPTS
+══════════════════════════════════════ -->
+
+<!-- Mobile sidebar toggle -->
+<script>
+(function () {
+  var sidebar = document.getElementById('sd-sidebar');
+  var overlay = document.getElementById('sd-overlay');
+  var toggle  = document.getElementById('sd-menu-toggle');
+
+  function openSidebar() {
+    sidebar.classList.add('open');
+    overlay.classList.add('open');
+    toggle.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('open');
+    toggle.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  }
+
+  if (toggle) toggle.addEventListener('click', function () {
+    sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
+  });
+
+  if (overlay) overlay.addEventListener('click', closeSidebar);
+
+  // Close on Escape
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeSidebar();
+  });
+
+  // Dynamic greeting
+  var hour = new Date().getHours();
+  var icon = document.getElementById('greet-icon');
+  var text = document.getElementById('greet-text');
+  var msg  = document.getElementById('motivational-msg');
+  var msgs = [
+    'Keep reading — every session makes you stronger!',
+    'Practice makes progress. Let\'s keep going!',
+    'Great readers are made one page at a time.',
+    'Your words have power. Keep using them!',
+    'Every book is a new adventure waiting for you!'
+  ];
+  if (text) {
+    if (hour < 12)       { text.textContent = 'Good morning!'; if (icon) icon.className = 'fas fa-sun'; }
+    else if (hour < 17)  { text.textContent = 'Good afternoon!'; if (icon) icon.className = 'fas fa-cloud-sun'; }
+    else                 { text.textContent = 'Good evening!'; if (icon) icon.className = 'fas fa-moon'; }
+  }
+  if (msg) msg.textContent = msgs[Math.floor(Math.random() * msgs.length)];
+})();
+
+// Animated counter utility
+function animateCounter(el, target, suffix) {
+  if (!el || isNaN(target)) { if (el) el.textContent = target + (suffix || ''); return; }
+  var start = 0;
+  var duration = 800;
+  var startTime = null;
+  target = parseInt(target) || 0;
+  function step(ts) {
+    if (!startTime) startTime = ts;
+    var progress = Math.min((ts - startTime) / duration, 1);
+    var eased = 1 - Math.pow(1 - progress, 3);
+    el.textContent = Math.round(start + (target - start) * eased) + (suffix || '');
+    if (progress < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+</script>
+
+<!-- Firebase + Dashboard Logic (original, fully preserved) -->
+<script type="module">
+  import { app, auth, db } from './js/firebase-config.js';
+  import { requireAuth } from './js/auth-check.js';
+  import { signOut } from 'https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js';
+  import {
+    doc, getDoc, collection, query, where, getDocs, orderBy, limit
+  } from 'https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js';
+
+  window.formatDate = formatDate;
+
+  /* ── DOM refs ── */
+  const userNameEl       = document.getElementById('user-name');
+  const sidebarNameEl    = document.getElementById('sd-sidebar-name');
+  const userAvatar       = document.getElementById('user-avatar');
+  const sidebarAvatar    = document.getElementById('sd-sidebar-avatar');
+  const upcomingCount    = document.getElementById('upcoming-tests-count');
+  const signOutBtn       = document.getElementById('sign-out-btn');
+
+  /* welcome cards */
+  const wcTests  = document.getElementById('wc-tests');
+  const wcScore  = document.getElementById('wc-score');
+  const wcStreak = document.getElementById('wc-streak');
+
+  /* stat cards */
+  const statCompleted = document.getElementById('stat-completed');
+  const statAvg       = document.getElementById('stat-avg');
+  const statUpcoming  = document.getElementById('stat-upcoming');
+
+  /* Badge */
+  const badgeTests = document.getElementById('sd-badge-tests');
+
+  /* ── Helpers ── */
+  function formatDate(date) {
+    return new Date(date).toLocaleDateString('en-US', {
+      year: 'numeric', month: 'short', day: 'numeric'
+    });
+  }
+
+  function scoreColour(pct) {
+    return pct >= 70 ? 'score-high' : pct >= 50 ? 'score-medium' : 'score-low';
+  }
+
+  function setAvatar(el, user, name) {
+    if (!el) return;
+    el.alt = name || 'User';
+    if (user.photoURL) {
+      el.src = user.photoURL;
+    } else {
+      const initials = (name || 'S').split(' ').map(n => n[0]).join('').toUpperCase();
+      el.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=4f46e5&color=fff`;
+    }
+  }
+
+  /* ── Load user data ── */
+  async function loadUserData(user) {
+    try {
+      const [userDoc, studentDoc] = await Promise.all([
+        getDoc(doc(db, 'users', user.uid)),
+        getDoc(doc(db, 'students', user.uid))
+      ]);
+
+      let displayName = 'Student';
+
+      if (userDoc.exists()) {
+        const d = userDoc.data();
+        displayName = d.name || 'Student';
+        if (userNameEl)    userNameEl.textContent    = displayName;
+        if (sidebarNameEl) sidebarNameEl.textContent = displayName;
+        setAvatar(userAvatar, user, displayName);
+        setAvatar(sidebarAvatar, user, displayName);
+      }
+
+      await Promise.all([
+        loadStatistics(user.uid),
+        loadRecentTests(user.uid),
+        loadUpcomingTests(user.uid),
+        loadGamificationData(user.uid),
+        loadLatestResults(user.uid)
+      ]);
+
+    } catch (err) {
+      console.error('Error loading user data:', err);
+    }
+  }
+
+  /* ── Statistics ── */
+  async function loadStatistics(userId) {
+    try {
+      const attRef   = collection(db, 'students', userId, 'testAttempts');
+      const snap     = await getDocs(attRef);
+
+      let completed  = 0, totalScore = 0;
+      const doneIds  = [];
+
+      snap.forEach(d => {
+        const a = d.data();
+        if (a.percentage !== undefined) {
+          completed++;
+          totalScore += parseFloat(a.percentage);
+        }
+        if (a.testId) doneIds.push(a.testId);
+      });
+
+      const avg = completed > 0 ? Math.round(totalScore / completed) : 0;
+
+      /* upcoming = published tests not yet completed */
+      const allTests = await getDocs(query(
+        collection(db, 'tests'),
+        where('status', '==', 'published')
+      ));
+      let upcoming = 0;
+      allTests.forEach(d => { if (!doneIds.includes(d.id)) upcoming++; });
+
+      /* Update stat cards with animated counters */
+      if (statCompleted) animateCounter(statCompleted, completed, '');
+      if (statAvg)       animateCounter(statAvg, avg, '%');
+      if (statUpcoming)  animateCounter(statUpcoming, upcoming, '');
+      if (wcTests)       animateCounter(wcTests, completed, '');
+      if (wcScore)       animateCounter(wcScore, avg, '%');
+      if (upcomingCount) upcomingCount.textContent = `${upcoming} upcoming test${upcoming !== 1 ? 's' : ''}`;
+      if (badgeTests)    badgeTests.textContent    = upcoming || '0';
+
+    } catch (err) {
+      console.error('Error loading statistics:', err);
+    }
+  }
+
+  /* ── Recent Tests ── */
+  async function loadRecentTests(userId) {
+    const container = document.getElementById('recent-tests-list');
+    if (!container) return;
+
+    try {
+      const attRef   = collection(db, 'students', userId, 'testAttempts');
+      const attSnap  = await getDocs(query(attRef, orderBy('submittedAt', 'desc')));
+
+      const testIds = [];
+      const attMap  = new Map();
+
+      attSnap.forEach(d => {
+        const a = { id: d.id, ...d.data() };
+        if (a.testId && !testIds.includes(a.testId)) {
+          testIds.push(a.testId);
+          attMap.set(a.testId, a);
+        }
+      });
+
+      if (testIds.length === 0) {
+        container.innerHTML = emptyState('No tests attempted yet', 'Complete your first reading assessment to see results here.');
+        return;
+      }
+
+      const testsSnap = await getDocs(query(
+        collection(db, 'tests'),
+        where('__name__', 'in', testIds)
+      ));
+
+      let tests = [];
+      testsSnap.forEach(d => {
+        const att = attMap.get(d.id);
+        const sub = att?.submittedAt;
+        const ts  = sub ? (typeof sub.toDate === 'function' ? sub.toDate() : new Date(sub)) : new Date(0);
+        tests.push({ id: d.id, ...d.data(), attempt: att, submittedAt: ts });
+      });
+
+      tests.sort((a, b) => b.submittedAt - a.submittedAt);
+      tests = tests.slice(0, 5);
+
+      container.innerHTML = '';
+      tests.forEach(test => {
+        const att = test.attempt;
+        let pct = 0;
+        if (att) {
+          pct = att.percentage || att.scorePercentage ||
+            (att.totalScore && att.maxPossibleScore ? att.totalScore / att.maxPossibleScore * 100 : 0);
+          pct = Math.min(100, Math.max(0, Math.round(parseFloat(pct))));
+        }
+
+        const item = document.createElement('div');
+        item.className = 'sd-test-item';
+        item.innerHTML = `
+          <div class="sd-test-icon ic-completed">
+            <i class="fas fa-check-circle"></i>
+          </div>
+          <div class="sd-test-body">
+            <div class="sd-test-name">${test.title || 'Untitled Test'}</div>
+            <div class="sd-test-meta">
+              <span><i class="fas fa-layer-group"></i> ${test.sections?.length || 0} sections</span>
+              <span><i class="far fa-calendar-alt"></i> ${test.submittedAt ? formatDate(test.submittedAt) : 'N/A'}</span>
+            </div>
+            ${att ? `
+              <div style="display:flex;align-items:center;gap:0.5rem;margin-top:0.3rem;">
+                <span class="sd-score-chip ${scoreColour(pct)}">${pct}%</span>
+                <div class="sd-progress" style="flex:1;">
+                  <div class="sd-progress-fill pf-blue" style="width:${pct}%;"></div>
+                </div>
+              </div>` : ''}
+          </div>
+          <div class="sd-test-actions">
+            <button onclick="showTestDetails(${JSON.stringify(test).replace(/"/g, '&quot;').replace(/'/g, '&apos;')})"
+                    class="sd-btn sd-btn-outline" style="font-size:0.78rem;padding:0.4rem 0.85rem;">
+              Details
+            </button>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+
+    } catch (err) {
+      console.error('Error loading recent tests:', err);
+      if (container) {
+        container.innerHTML = `<div class="sd-empty">
+          <div class="sd-empty-icon"><i class="fas fa-exclamation-triangle" style="color:var(--sd-red);"></i></div>
+          <div class="sd-empty-title">Could not load tests</div>
+          <div class="sd-empty-sub">Please refresh the page and try again.</div>
+        </div>`;
+      }
+    }
+  }
+
+  /* ── Upcoming Tests ── */
+  async function loadUpcomingTests(userId) {
+    const container = document.getElementById('upcoming-tests-list');
+    if (!container) return;
+
+    try {
+      const testsSnap = await getDocs(query(
+        collection(db, 'tests'),
+        where('status', '==', 'published')
+      ));
+
+      let tests = [];
+      testsSnap.forEach(d => {
+        const t = d.data();
+        if (t.isActive !== false) {
+          tests.push({ id: d.id, ...t, dueDate: t.dueDate?.toDate() || null });
+        }
+      });
+
+      tests.sort((a, b) => (a.dueDate || new Date(0)) - (b.dueDate || new Date(0)));
+      tests = tests.slice(0, 3);
+
+      if (tests.length === 0) {
+        container.innerHTML = emptyState('No upcoming tests', 'Check back later for new assessments.');
+        return;
+      }
+
+      container.innerHTML = '';
+      tests.forEach(test => {
+        const item = document.createElement('div');
+        item.className = 'sd-test-item';
+        item.innerHTML = `
+          <div class="sd-test-icon ic-upcoming">
+            <i class="fas fa-clipboard-list"></i>
+          </div>
+          <div class="sd-test-body">
+            <div class="sd-test-name">${test.title || 'Untitled Test'}</div>
+            <div class="sd-test-meta">
+              <span><i class="far fa-calendar-alt"></i>
+                ${test.dueDate ? 'Due ' + formatDate(test.dueDate) : 'No due date'}</span>
+            </div>
+          </div>
+          <div class="sd-test-actions">
+            <a href="take-test.html?testId=${test.id}" class="sd-btn sd-btn-primary"
+               style="font-size:0.78rem;padding:0.4rem 0.85rem;">
+              Start
+            </a>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+
+    } catch (err) {
+      console.error('Error loading upcoming tests:', err);
+    }
+  }
+
+  /* ── Empty state helper ── */
+  function emptyState(title, sub) {
+    return `<div class="sd-empty">
+      <div class="sd-empty-icon"><i class="fas fa-inbox"></i></div>
+      <div class="sd-empty-title">${title}</div>
+      <div class="sd-empty-sub">${sub}</div>
+    </div>`;
+  }
+
+  /* ── Sign out ── */
+  if (signOutBtn) {
+    signOutBtn.addEventListener('click', async () => {
+      try {
+        await signOut(auth);
+        window.location.href = 'auth/login-fixed.html';
+      } catch (err) {
+        console.error('Error signing out:', err);
+        alert('Error signing out. Please try again.');
+      }
+    });
+  }
+
+  /* ── Load Gamification Data ── */
+  async function loadGamificationData(userId) {
+    try {
+      const gamDoc = await getDoc(doc(db, 'students', userId, 'gamification', 'profile'));
+      const container = document.getElementById('dashboard-badges');
+      if (!container) return;
+
+      if (!gamDoc.exists()) {
+        container.innerHTML = `
+          <div style="text-align:center;padding:1.5rem 1rem;">
+            <div style="font-size:1.5rem;margin-bottom:0.5rem;opacity:0.4;">🏆</div>
+            <div style="font-size:0.85rem;color:var(--sd-text-3);">No badges yet</div>
+            <a href="take-reading-test.html" class="sd-btn sd-btn-primary" style="margin-top:0.75rem;font-size:0.8rem;display:inline-flex;">
+              <i class="fas fa-play"></i> Take a Test
+            </a>
+          </div>`;
+        return;
+      }
+
+      const data = gamDoc.data();
+      const badges = data.badges || [];
+      const totalPoints = data.totalPoints || 0;
+
+      // Update the welcome mini-card
+      if (wcStreak) wcStreak.textContent = totalPoints.toLocaleString();
+
+      if (badges.length === 0) {
+        container.innerHTML = `
+          <div style="text-align:center;padding:1.5rem 1rem;">
+            <div style="font-size:1.5rem;margin-bottom:0.5rem;opacity:0.4;">🏆</div>
+            <div style="font-size:0.85rem;color:var(--sd-text-3);">Complete an assessment to earn badges!</div>
+          </div>`;
+        return;
+      }
+
+      // Show latest 5 badges
+      const displayBadges = badges.slice(-5).reverse();
+      container.innerHTML = `
+        <div style="display:flex;flex-wrap:wrap;gap:0.6rem;align-items:center;">
+          ${displayBadges.map(b => `
+            <div style="display:flex;align-items:center;gap:0.4rem;padding:0.4rem 0.7rem;background:${b.color || '#4f46e5'}10;border:1px solid ${b.color || '#4f46e5'}25;border-radius:10px;" title="${b.description || ''}">
+              <span style="font-size:1.1rem;">${b.emoji || '🏅'}</span>
+              <span style="font-size:0.72rem;font-weight:700;color:${b.color || '#4f46e5'};">${b.name}</span>
+            </div>
+          `).join('')}
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid var(--sd-border);">
+          <span style="font-size:0.78rem;color:var(--sd-text-3);">
+            <strong style="color:var(--sd-text);">${badges.length}</strong> badge${badges.length !== 1 ? 's' : ''} earned
+          </span>
+          <span style="font-size:0.78rem;font-weight:700;color:#f59e0b;">
+            ⭐ ${totalPoints.toLocaleString()} pts
+          </span>
+        </div>
+      `;
+    } catch (err) {
+      console.error('Error loading gamification:', err);
+    }
+  }
+
+  /* ── Load Latest Results (Fluency + Recs) ── */
+  async function loadLatestResults(userId) {
+    try {
+      const resultsSnap = await getDocs(
+        query(collection(db, 'results'), orderBy('timestamp', 'desc'), limit(5))
+      );
+      const myResults = resultsSnap.docs
+        .map(d => d.data())
+        .filter(r => r.userId === userId);
+
+      if (myResults.length === 0) return;
+      const latest = myResults[0];
+
+      // Fluency card
+      const fluencyContainer = document.getElementById('dashboard-fluency');
+      if (fluencyContainer && latest.fluency) {
+        const f = latest.fluency;
+        const fluencyColor = f.classification === 'Fluent' ? '#10b981' : f.classification === 'Developing' ? '#f59e0b' : '#ef4444';
+        const timeSec = Math.round((f.readingTimeMs || 0) / 1000);
+        const timeDisplay = timeSec >= 60 ? `${Math.floor(timeSec/60)}m ${timeSec%60}s` : `${timeSec}s`;
+
+        fluencyContainer.innerHTML = `
+          <div style="display:flex;justify-content:space-around;text-align:center;gap:0.5rem;flex-wrap:wrap;">
+            <div>
+              <div style="font-size:1.5rem;font-weight:800;color:#4f46e5;">${f.wordsPerMinute || 0}</div>
+              <div style="font-size:0.65rem;font-weight:700;color:var(--sd-text-3);text-transform:uppercase;">WPM</div>
+            </div>
+            <div>
+              <div style="font-size:1.5rem;font-weight:800;color:#10b981;">${f.accuracyRate || 0}%</div>
+              <div style="font-size:0.65rem;font-weight:700;color:var(--sd-text-3);text-transform:uppercase;">Accuracy</div>
+            </div>
+            <div>
+              <div style="font-size:1.5rem;font-weight:800;color:#f59e0b;">${timeDisplay}</div>
+              <div style="font-size:0.65rem;font-weight:700;color:var(--sd-text-3);text-transform:uppercase;">Time</div>
+            </div>
+          </div>
+          <div style="text-align:center;margin-top:0.6rem;">
+            <span style="display:inline-block;padding:0.25rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;color:white;background:${fluencyColor};">
+              ${f.classification || 'N/A'} Reader
+            </span>
+          </div>
+        `;
+      }
+
+      // Recommendations card
+      const recsContainer = document.getElementById('dashboard-recs');
+      if (recsContainer && latest.recommendations && latest.recommendations.length > 0) {
+        const topRecs = latest.recommendations.slice(0, 3);
+        const colors = { high: '#ef4444', medium: '#f59e0b', low: '#10b981' };
+        recsContainer.innerHTML = topRecs.map(r => `
+          <div style="display:flex;align-items:flex-start;gap:0.5rem;padding:0.5rem 0;border-bottom:1px solid var(--sd-border);">
+            <div style="width:4px;height:4px;min-width:4px;border-radius:50%;background:${colors[r.priority] || '#64748b'};margin-top:6px;"></div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:0.8rem;font-weight:700;color:var(--sd-text);">${r.title}</div>
+              <div style="font-size:0.72rem;color:var(--sd-text-3);line-height:1.4;margin-top:0.1rem;">${r.detail.substring(0, 80)}${r.detail.length > 80 ? '…' : ''}</div>
+            </div>
+          </div>
+        `).join('');
+      }
+    } catch (err) {
+      console.error('Error loading latest results:', err);
+    }
+  }
+
+  /* ── Show Test Details Modal ── */
+  window.showTestDetails = function (testData) {
+    const modal     = document.getElementById('test-details-modal');
+    const titleEl   = document.getElementById('test-details-title');
+    const scoreEl   = document.getElementById('test-total-score');
+    const possEl    = document.getElementById('test-total-possible');
+    const pctEl     = document.getElementById('test-percentage');
+    const sectionsEl= document.getElementById('sections-summary');
+
+    if (!modal || !testData?.attempt) return;
+
+    const att   = testData.attempt;
+    const total      = att.totalScore || 0;
+    const possible   = att.maxPossibleScore || 1;
+    const pct        = att.percentage || Math.round((total / possible) * 100);
+
+    titleEl.textContent = att.testTitle || testData.title || 'Test Details';
+    scoreEl.textContent  = total;
+    possEl.textContent   = possible;
+    pctEl.textContent    = pct + '%';
+    pctEl.style.color    = pct >= 70 ? 'var(--sd-green)' : pct >= 50 ? 'var(--sd-amber)' : 'var(--sd-red)';
+
+    sectionsEl.innerHTML = '';
+
+    if (att.sections && Array.isArray(att.sections)) {
+      att.sections.forEach((s, i) => {
+        const name    = s.sectionTitle || `Section ${i + 1}`;
+        const items   = s.items || [];
+        const correct = items.filter(it => it.isCorrect).length;
+        const sScore  = s.score !== undefined ? s.score : correct;
+        const sPoss   = s.maxPossibleScore || items.length || 1;
+        const sPct    = Math.round((sScore / sPoss) * 100) || 0;
+        const bar     = sPct >= 70 ? 'pf-green' : sPct >= 50 ? 'pf-amber' : '';
+
+        const el = document.createElement('div');
+        el.className = 'sd-section-result';
+        el.innerHTML = `
+          <div class="sd-section-result-header">
+            <div class="sd-section-result-name">${name}</div>
+            <span class="sd-score-chip ${scoreColour(sPct)}">${sPct}%</span>
+          </div>
+          <div class="sd-progress">
+            <div class="sd-progress-fill ${bar}" style="width:${sPct}%;"></div>
+          </div>
+          <div class="sd-section-result-meta">
+            Score: ${sScore}/${sPoss} &nbsp;·&nbsp; ${items.length} items
+          </div>
+        `;
+        sectionsEl.appendChild(el);
+      });
+    }
+
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  };
+
+  /* ── Close Modal ── */
+  window.closeTestDetailsModal = function () {
+    const modal = document.getElementById('test-details-modal');
+    if (modal) {
+      modal.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    return false;
+  };
+
+  /* Click outside modal to close */
+  document.getElementById('test-details-modal').addEventListener('click', function (e) {
+    if (e.target === this) closeTestDetailsModal();
+  });
+
+  /* Escape key */
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeTestDetailsModal();
+  });
+
+  /* ── Bootstrap ── */
+  requireAuth(['student'])
+    .then(({ user }) => loadUserData(user))
+    .catch(err => console.error('Auth Check Failed:', err));
+</script>
+
+</body>
+</html>

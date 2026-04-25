@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard — Alpharia</title>
+    <meta name="description" content="Platform administration dashboard for Alpharia.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/student-dashboard-clean.css">
+    <link rel="stylesheet" href="css/teacher-dashboard-clean.css">
+
+    <style>
+        @keyframes fadeIn { from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)} }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+
+        .adm-hero {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: white; padding: 2.5rem 2rem; border-radius: var(--sd-radius);
+            margin-bottom: 2rem; position: relative; overflow: hidden;
+        }
+        .adm-hero::after {
+            content:''; position:absolute; top:-30%; right:-8%; width:350px; height:350px;
+            background:rgba(79,70,229,0.12); filter:blur(80px); border-radius:50%;
+        }
+        .adm-hero-title { font-size:1.8rem; font-weight:800; margin-bottom:0.25rem; position:relative; z-index:1; }
+        .adm-hero-sub { opacity:0.7; font-size:0.92rem; position:relative; z-index:1; }
+        .adm-hero-badge {
+            display:inline-flex; align-items:center; gap:0.3rem;
+            background:rgba(245,158,11,0.2); color:#f59e0b; padding:0.2rem 0.6rem;
+            border-radius:50px; font-size:0.68rem; font-weight:700; text-transform:uppercase;
+            margin-left:0.5rem; letter-spacing:0.04em;
+        }
+
+        /* Metric cards */
+        .adm-metrics { display:grid; grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); gap:1rem; margin-bottom:2rem; }
+        .adm-metric {
+            background:var(--sd-surface); border:1.5px solid var(--sd-border); border-radius:var(--sd-radius);
+            padding:1.25rem; display:flex; align-items:center; gap:1rem; transition:0.2s;
+        }
+        .adm-metric:hover { transform:translateY(-3px); border-color:var(--sd-primary); box-shadow:var(--sd-shadow-sm); }
+        .adm-metric-icon {
+            width:48px; height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center;
+            font-size:1.2rem; flex-shrink:0;
+        }
+        .adm-metric-val { font-size:1.6rem; font-weight:800; color:var(--sd-text); line-height:1; }
+        .adm-metric-label { font-size:0.68rem; font-weight:700; color:var(--sd-text-3); text-transform:uppercase; letter-spacing:0.04em; }
+
+        /* Quick actions */
+        .adm-actions { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:1rem; margin-bottom:2rem; }
+        .adm-action {
+            display:flex; align-items:center; gap:1rem; padding:1.1rem 1.25rem;
+            background:var(--sd-surface); border:1.5px solid var(--sd-border); border-radius:var(--sd-radius);
+            text-decoration:none; color:var(--sd-text); transition:0.2s; cursor:pointer;
+        }
+        .adm-action:hover { border-color:var(--sd-primary); transform:translateY(-2px); box-shadow:var(--sd-shadow-sm); }
+        .adm-action-icon {
+            width:42px; height:42px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+            font-size:1.1rem; flex-shrink:0;
+        }
+        .adm-action-text { font-size:0.85rem; font-weight:700; }
+        .adm-action-sub { font-size:0.7rem; color:var(--sd-text-3); font-weight:500; }
+
+        /* Activity feed */
+        .adm-activity-item {
+            display:flex; align-items:flex-start; gap:0.85rem; padding:0.85rem 0;
+            border-bottom:1px solid var(--sd-border);
+        }
+        .adm-activity-item:last-child { border-bottom:none; }
+        .adm-activity-dot {
+            width:10px; height:10px; border-radius:50%; flex-shrink:0; margin-top:5px;
+        }
+        .adm-activity-text { font-size:0.82rem; color:var(--sd-text-2); line-height:1.4; }
+        .adm-activity-text strong { color:var(--sd-text); }
+        .adm-activity-time { font-size:0.68rem; color:var(--sd-text-3); margin-top:0.15rem; }
+
+        /* At-risk */
+        .adm-risk-item {
+            display:flex; align-items:center; gap:0.85rem; padding:0.75rem 0.85rem;
+            background:rgba(239,68,68,0.04); border:1px solid rgba(239,68,68,0.1);
+            border-radius:var(--sd-radius-sm); margin-bottom:0.5rem;
+        }
+        .adm-risk-dot { width:10px; height:10px; border-radius:50%; background:#ef4444; box-shadow:0 0 8px rgba(239,68,68,0.4); flex-shrink:0; }
+        .adm-risk-name { font-size:0.82rem; font-weight:700; color:var(--sd-text); }
+        .adm-risk-detail { font-size:0.7rem; color:var(--sd-text-3); }
+        .adm-risk-badge { font-size:0.65rem; font-weight:700; padding:0.15rem 0.5rem; border-radius:50px; background:rgba(239,68,68,0.1); color:#ef4444; margin-left:auto; flex-shrink:0; }
+
+        .adm-loading { text-align:center; padding:2rem; color:var(--sd-text-3); animation:pulse 1.5s infinite; }
+
+        @media(max-width:768px) {
+            .adm-hero { padding:1.5rem; }
+            .adm-hero-title { font-size:1.3rem; }
+            .adm-metrics { grid-template-columns:repeat(2, 1fr); }
+        }
+    </style>
+</head>
+
+<body class="sd-page">
+<div class="sd-shell">
+    <!-- SIDEBAR -->
+    <aside class="sd-sidebar" id="sidebar">
+        <div class="sd-sidebar-brand">
+            <div class="sd-brand-icon" style="background:linear-gradient(135deg,#4f46e5,#7c3aed);"><i class="fas fa-shield-alt"></i></div>
+            <span class="sd-brand-text">Alpharia <span style="font-size:0.55rem;background:rgba(245,158,11,0.2);color:#f59e0b;padding:0.1rem 0.4rem;border-radius:4px;margin-left:0.3rem;font-weight:800;">ADMIN</span></span>
+        </div>
+        <nav class="sd-nav">
+            <span class="sd-nav-section-label">Platform</span>
+            <a href="admin-dashboard.html" class="sd-nav-link active"><i class="fas fa-chart-pie"></i><span>Dashboard</span></a>
+            <a href="admin-management.html" class="sd-nav-link"><i class="fas fa-users-cog"></i><span>Users & Schools</span></a>
+            <a href="admin-tests.html" class="sd-nav-link"><i class="fas fa-clipboard-list"></i><span>All Tests</span></a>
+            <a href="admin-create-test.html" class="sd-nav-link"><i class="fas fa-plus-circle"></i><span>Create Test</span></a>
+
+            <span class="sd-nav-section-label">Analytics</span>
+            <a href="admin-reports.html" class="sd-nav-link"><i class="fas fa-chart-bar"></i><span>Reports</span></a>
+
+            <span class="sd-nav-section-label">Account</span>
+            <a href="admin-settings.html" class="sd-nav-link"><i class="fas fa-cog"></i><span>Settings</span></a>
+        </nav>
+        <div class="sd-sidebar-footer">
+            <div class="sd-sidebar-user">
+                <div class="sd-sidebar-user-info">
+                    <div class="sd-sidebar-user-name" id="sidebar-admin-name">Loading…</div>
+                    <div class="sd-sidebar-user-role">Platform Owner</div>
+                </div>
+                <button class="sd-icon-btn" id="logout-btn" title="Sign Out" style="margin-left:auto;color:var(--sd-text-3);"><i class="fas fa-sign-out-alt"></i></button>
+            </div>
+        </div>
+    </aside>
+    <div class="sd-sidebar-overlay" id="sidebar-overlay"></div>
+
+    <!-- MAIN -->
+    <div class="sd-main">
+        <header class="sd-topbar">
+            <button class="sd-topbar-toggle menu-toggle d-lg-none" id="sidebar-toggle"><i class="fas fa-bars"></i></button>
+            <div style="font-weight:700; color:var(--sd-text);">Admin Dashboard</div>
+            <div class="sd-topbar-actions">
+                <div class="sd-avatar-btn"><img id="user-avatar" src="https://ui-avatars.com/api/?name=Admin&background=4f46e5&color=fff" width="38" height="38"></div>
+            </div>
+        </header>
+
+        <main class="sd-body" style="animation:fadeIn 0.4s ease-out;">
+            <!-- Hero -->
+            <div class="adm-hero">
+                <div class="adm-hero-title">
+                    Welcome, <span id="admin-name">Administrator</span>
+                    <span class="adm-hero-badge"><i class="fas fa-crown"></i> Owner</span>
+                </div>
+                <div class="adm-hero-sub">Here's a full overview of the Alpharia platform.</div>
+            </div>
+
+            <!-- Metrics -->
+            <div class="adm-metrics">
+                <div class="adm-metric">
+                    <div class="adm-metric-icon" style="background:rgba(79,70,229,0.1);color:#4f46e5;"><i class="fas fa-users"></i></div>
+                    <div><div class="adm-metric-val" id="m-users">—</div><div class="adm-metric-label">Total Users</div></div>
+                </div>
+                <div class="adm-metric">
+                    <div class="adm-metric-icon" style="background:rgba(59,130,246,0.1);color:#3b82f6;"><i class="fas fa-user-graduate"></i></div>
+                    <div><div class="adm-metric-val" id="m-students">—</div><div class="adm-metric-label">Students</div></div>
+                </div>
+                <div class="adm-metric">
+                    <div class="adm-metric-icon" style="background:rgba(139,92,246,0.1);color:#8b5cf6;"><i class="fas fa-chalkboard-teacher"></i></div>
+                    <div><div class="adm-metric-val" id="m-teachers">—</div><div class="adm-metric-label">Teachers</div></div>
+                </div>
+                <div class="adm-metric">
+                    <div class="adm-metric-icon" style="background:rgba(20,184,166,0.1);color:#14b8a6;"><i class="fas fa-university"></i></div>
+                    <div><div class="adm-metric-val" id="m-schools">—</div><div class="adm-metric-label">Schools</div></div>
+                </div>
+                <div class="adm-metric">
+                    <div class="adm-metric-icon" style="background:rgba(245,158,11,0.1);color:#f59e0b;"><i class="fas fa-clipboard-list"></i></div>
+                    <div><div class="adm-metric-val" id="m-tests">—</div><div class="adm-metric-label">Tests</div></div>
+                </div>
+                <div class="adm-metric">
+                    <div class="adm-metric-icon" style="background:rgba(236,72,153,0.1);color:#ec4899;"><i class="fas fa-chart-line"></i></div>
+                    <div><div class="adm-metric-val" id="m-results">—</div><div class="adm-metric-label">Assessments</div></div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="adm-actions">
+                <a href="admin-management.html" class="adm-action">
+                    <div class="adm-action-icon" style="background:rgba(79,70,229,0.1);color:#4f46e5;"><i class="fas fa-users-cog"></i></div>
+                    <div><div class="adm-action-text">Users & Schools</div><div class="adm-action-sub">View all users, students, teachers, schools</div></div>
+                </a>
+                <a href="admin-reports.html" class="adm-action">
+                    <div class="adm-action-icon" style="background:rgba(20,184,166,0.1);color:#14b8a6;"><i class="fas fa-chart-bar"></i></div>
+                    <div><div class="adm-action-text">Platform Reports</div><div class="adm-action-sub">Performance analytics & exports</div></div>
+                </a>
+                <a href="admin-tests.html" class="adm-action">
+                    <div class="adm-action-icon" style="background:rgba(245,158,11,0.1);color:#f59e0b;"><i class="fas fa-clipboard-check"></i></div>
+                    <div><div class="adm-action-text">All Tests</div><div class="adm-action-sub">Manage reading tests</div></div>
+                </a>
+                <a href="admin-create-test.html" class="adm-action">
+                    <div class="adm-action-icon" style="background:rgba(236,72,153,0.1);color:#ec4899;"><i class="fas fa-plus-circle"></i></div>
+                    <div><div class="adm-action-text">Create Test</div><div class="adm-action-sub">Build a new reading assessment</div></div>
+                </a>
+            </div>
+
+            <!-- Grid: Activity + At-Risk -->
+            <div class="td-grid-2">
+                <div class="td-card">
+                    <div class="td-card-header"><h3><i class="fas fa-stream"></i> Recent Activity</h3></div>
+                    <div class="td-card-body" id="activity-feed">
+                        <div class="adm-loading"><i class="fas fa-spinner fa-spin"></i> Loading activity…</div>
+                    </div>
+                </div>
+                <div class="td-card">
+                    <div class="td-card-header"><h3><i class="fas fa-exclamation-triangle" style="color:#ef4444;"></i> At-Risk Students</h3></div>
+                    <div class="td-card-body" id="at-risk-panel">
+                        <div class="adm-loading"><i class="fas fa-spinner fa-spin"></i> Loading…</div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+</div>
+
+<script type="module">
+    import { app, auth, db } from './js/firebase-config.js';
+    import { requireAuth } from './js/auth-check.js';
+    import { doc, getDoc, collection, getDocs, query, orderBy, limit } from 'https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js';
+    import { signOut } from 'https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js';
+
+    function initSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const toggle = document.getElementById('sidebar-toggle');
+        const overlay = document.getElementById('sidebar-overlay');
+        if (toggle && sidebar) toggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active'); sidebar.classList.toggle('open');
+            overlay?.classList.toggle('active'); overlay?.classList.toggle('open');
+        });
+        if (overlay) overlay.addEventListener('click', () => {
+            sidebar.classList.remove('active','open'); overlay.classList.remove('active','open');
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        initSidebar();
+        try {
+            const { user } = await requireAuth(['admin']);
+
+            // Load admin name
+            let displayName = user.displayName || 'Administrator';
+            try {
+                const adminDoc = await getDoc(doc(db, 'admins', user.uid));
+                if (adminDoc.exists()) displayName = adminDoc.data().name || displayName;
+                else {
+                    const userDoc = await getDoc(doc(db, 'users', user.uid));
+                    if (userDoc.exists()) displayName = userDoc.data().name || userDoc.data().firstName || displayName;
+                }
+            } catch(e) {}
+
+            document.getElementById('admin-name').textContent = displayName;
+            document.getElementById('sidebar-admin-name').textContent = displayName;
+
+            document.getElementById('logout-btn').addEventListener('click', () => signOut(auth).then(() => window.location.href = 'auth/login-fixed.html'));
+
+            // Load all metrics in parallel
+            const [usersSnap, studentsSnap, teachersSnap, schoolsSnap, testsSnap, resultsSnap] = await Promise.all([
+                getDocs(collection(db, 'users')),
+                getDocs(collection(db, 'students')),
+                getDocs(collection(db, 'teachers')),
+                getDocs(collection(db, 'schools')),
+                getDocs(collection(db, 'tests')),
+                getDocs(collection(db, 'results'))
+            ]);
+
+            document.getElementById('m-users').textContent = usersSnap.size.toLocaleString();
+            document.getElementById('m-students').textContent = studentsSnap.size.toLocaleString();
+            document.getElementById('m-teachers').textContent = teachersSnap.size.toLocaleString();
+            document.getElementById('m-schools').textContent = schoolsSnap.size.toLocaleString();
+            document.getElementById('m-tests').textContent = testsSnap.size.toLocaleString();
+            document.getElementById('m-results').textContent = resultsSnap.size.toLocaleString();
+
+            // Build activity feed from results (latest assessments)
+            const results = [];
+            resultsSnap.forEach(d => results.push({ id: d.id, ...d.data() }));
+            results.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+
+            const actFeed = document.getElementById('activity-feed');
+            const recentResults = results.slice(0, 8);
+            if (recentResults.length === 0) {
+                actFeed.innerHTML = '<p style="text-align:center; padding:1rem; color:var(--sd-text-3);">No recent activity.</p>';
+            } else {
+                actFeed.innerHTML = recentResults.map(r => {
+                    const name = r.studentName || r.userName || 'A student';
+                    const wpm = r.wpm ? Math.round(r.wpm) + ' WPM' : '';
+                    const acc = r.accuracy ? Math.round(r.accuracy) + '% accuracy' : '';
+                    const detail = [wpm, acc].filter(Boolean).join(', ');
+                    const ts = r.timestamp?.seconds ? timeAgo(r.timestamp.seconds * 1000) : 'Recently';
+                    const colors = ['#4f46e5','#3b82f6','#14b8a6','#f59e0b','#ec4899','#8b5cf6'];
+                    const color = colors[Math.floor(Math.random() * colors.length)];
+                    return `<div class="adm-activity-item">
+                        <div class="adm-activity-dot" style="background:${color};"></div>
+                        <div>
+                            <div class="adm-activity-text"><strong>${name}</strong> completed an assessment${detail ? ' — ' + detail : ''}</div>
+                            <div class="adm-activity-time">${ts}</div>
+                        </div>
+                    </div>`;
+                }).join('');
+            }
+
+            // At-risk students (low WPM or accuracy)
+            const studentMap = {};
+            studentsSnap.forEach(d => studentMap[d.id] = d.data());
+
+            const riskStudents = {};
+            results.forEach(r => {
+                const uid = r.userId || r.studentId;
+                if (!uid || riskStudents[uid]) return;
+                const wpm = r.wpm || r.fluency?.wordsPerMinute;
+                const acc = r.accuracy || r.fluency?.accuracyRate;
+                if ((wpm != null && wpm < 30) || (acc != null && acc < 70)) {
+                    const sData = studentMap[uid] || {};
+                    riskStudents[uid] = {
+                        name: r.studentName || sData.name || sData.displayName || 'Student',
+                        wpm: wpm != null ? Math.round(wpm) : null,
+                        acc: acc != null ? Math.round(acc) : null
+                    };
+                }
+            });
+
+            const riskPanel = document.getElementById('at-risk-panel');
+            const riskArr = Object.values(riskStudents).slice(0, 8);
+            if (riskArr.length === 0) {
+                riskPanel.innerHTML = '<p style="text-align:center; padding:1.5rem; color:var(--sd-text-3);"><i class="fas fa-check-circle" style="color:#10b981;font-size:1.3rem;"></i><br>No at-risk students detected.</p>';
+            } else {
+                riskPanel.innerHTML = riskArr.map(s => {
+                    const detail = [s.wpm != null ? s.wpm + ' WPM' : null, s.acc != null ? s.acc + '%' : null].filter(Boolean).join(' · ');
+                    return `<div class="adm-risk-item">
+                        <div class="adm-risk-dot"></div>
+                        <div><div class="adm-risk-name">${s.name}</div><div class="adm-risk-detail">${detail}</div></div>
+                        <div class="adm-risk-badge">NEEDS HELP</div>
+                    </div>`;
+                }).join('');
+            }
+
+        } catch (e) { console.error('Admin init error:', e); }
+    });
+
+    function timeAgo(ms) {
+        const diff = Date.now() - ms;
+        const mins = Math.floor(diff / 60000);
+        if (mins < 1) return 'Just now';
+        if (mins < 60) return mins + 'm ago';
+        const hrs = Math.floor(mins / 60);
+        if (hrs < 24) return hrs + 'h ago';
+        const days = Math.floor(hrs / 24);
+        return days + 'd ago';
+    }
+</script>
+</body>
+</html>

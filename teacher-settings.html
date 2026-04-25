@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Alpharia Teacher</title>
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Design System CSS -->
+    <link rel="stylesheet" href="css/student-dashboard-clean.css">
+    <link rel="stylesheet" href="css/teacher-dashboard-clean.css">
+</head>
+
+<body class="sd-page">
+
+<div class="sd-shell">
+
+    <!-- ═══════════ SIDEBAR ═══════════ -->
+    <aside class="sd-sidebar" id="sidebar" aria-label="Main navigation">
+
+        <!-- Brand -->
+        <a href="teacher-dashboard.html" class="sd-sidebar-brand" aria-label="Alpharia home">
+            <div class="sd-brand-icon"><i class="fas fa-book-open"></i></div>
+            <span class="sd-brand-text">Alpharia</span>
+        </a>
+
+        <!-- Nav -->
+        <nav class="sd-nav" aria-label="Dashboard navigation">
+            <span class="sd-nav-section-label">Main Menu</span>
+
+            <a href="teacher-dashboard.html" class="sd-nav-link">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="create-test.html" class="sd-nav-link">
+                <i class="fas fa-plus-circle"></i>
+                <span>Create Test</span>
+            </a>
+
+            <a href="my-tests.html" class="sd-nav-link">
+                <i class="fas fa-clipboard-list"></i>
+                <span>My Tests</span>
+            </a>
+
+            <span class="sd-nav-section-label">Analytics</span>
+
+            <a href="teacher-progress.html" class="sd-nav-link">
+                <i class="fas fa-chart-line"></i>
+                <span>Progress</span>
+            </a>
+
+            <a href="teacher-reports.html" class="sd-nav-link">
+                <i class="fas fa-file-pdf"></i>
+                <span>Reports</span>
+            </a>
+
+            <a href="resources.html" class="sd-nav-link">
+                <i class="fas fa-book"></i>
+                <span>Resources</span>
+            </a>
+
+            <span class="sd-nav-section-label">Account</span>
+
+            <a href="teacher-settings.html" class="sd-nav-link active" aria-current="page">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </a>
+
+            <a href="help.html" class="sd-nav-link">
+                <i class="fas fa-question-circle"></i>
+                <span>Help & Support</span>
+            </a>
+        </nav>
+
+        <!-- Sidebar footer: user info -->
+        <div class="sd-sidebar-footer">
+            <div class="sd-sidebar-user" title="Your account">
+                <img src="" alt="User" class="sd-sidebar-avatar" id="user-avatar-sidebar">
+                <div class="sd-sidebar-user-info">
+                    <div class="sd-sidebar-user-name" id="sidebar-teacher-name">Loading…</div>
+                    <div class="sd-sidebar-user-role">Teacher</div>
+                </div>
+                <button class="sd-icon-btn" id="logout-btn" title="Sign Out" style="margin-left:auto; color:var(--sd-text-3);">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Sidebar overlay (mobile) -->
+    <div class="sd-sidebar-overlay" id="sidebar-overlay" aria-hidden="true"></div>
+
+    <!-- ═══════════ MAIN ═══════════ -->
+    <div class="sd-main">
+
+        <!-- Top Bar -->
+        <header class="sd-topbar" role="banner">
+            <button class="sd-topbar-toggle menu-toggle d-lg-none" id="sidebar-toggle" aria-label="Open navigation">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <div class="sd-search" role="search">
+                <i class="fas fa-search" aria-hidden="true"></i>
+                <input type="text" id="search-input" placeholder="Search tests, students, or classes…" aria-label="Search">
+            </div>
+
+            <div class="sd-topbar-actions">
+                <a href="create-test.html" class="sd-btn sd-btn-primary" id="create-test-btn" style="padding: 0.4rem 1rem;">
+                    <i class="fas fa-plus"></i> Create Test
+                </a>
+                <button class="sd-icon-btn" aria-label="Notifications" title="Notifications">
+                    <i class="fas fa-bell"></i>
+                </button>
+
+                <div class="sd-avatar-btn" title="Your profile">
+                    <img src="" alt="User avatar" id="user-avatar" width="38" height="38">
+                </div>
+            </div>
+        </header>
+
+        <!-- Page Body -->
+        <main class="sd-body" id="main-content" style="animation: fadeIn 0.4s ease-out;">
+
+            <!-- Header -->
+            <div class="td-page-header">
+                <h1 class="td-page-title">Account Settings</h1>
+                <button class="sd-btn sd-btn-primary" id="saveChangesBtn">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+            </div>
+
+            <!-- Settings Layout -->
+            <div class="td-settings-grid">
+                
+                <!-- Left Sidebar -->
+                <div class="td-settings-sidebar">
+                    <div class="td-card td-profile-card">
+                        <img src="" alt="Profile" class="td-profile-pic" id="profile-pic">
+                        <h2 class="td-profile-name" id="profile-name">Loading...</h2>
+                        <p class="td-profile-role">Teacher</p>
+                        <button class="td-btn-sm" style="margin-top:0.75rem; width:100%; justify-content:center;">
+                            <i class="fas fa-camera"></i> Change Photo
+                        </button>
+                    </div>
+
+                    <div class="td-card td-card-body">
+                        <div class="td-settings-nav nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                            <a class="nav-link active" id="v-pills-profile-tab" data-bs-toggle="pill" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="true" style="cursor:pointer;">
+                                <i class="fas fa-user-circle"></i> Profile
+                            </a>
+                            <a class="nav-link" id="v-pills-account-tab" data-bs-toggle="pill" data-bs-target="#account" type="button" role="tab" aria-controls="account" aria-selected="false" style="cursor:pointer;">
+                                <i class="fas fa-shield-alt"></i> Account
+                            </a>
+                            <a class="nav-link" id="v-pills-notifications-tab" data-bs-toggle="pill" data-bs-target="#notifications" type="button" role="tab" aria-controls="notifications" aria-selected="false" style="cursor:pointer;">
+                            <a class="nav-link" id="v-pills-notifications-tab" data-bs-toggle="pill" data-bs-target="#notifications" type="button" role="tab" aria-controls="notifications" aria-selected="false" style="cursor:pointer;">
+                                <i class="fas fa-bell"></i> Notifications
+                            </a>
+                            <a class="nav-link" id="v-pills-booking-tab" data-bs-toggle="pill" data-bs-target="#booking" type="button" role="tab" aria-controls="booking" aria-selected="false" style="cursor:pointer;">
+                                <i class="fas fa-hand-holding-usd"></i> Professional Services
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Content -->
+                <div class="td-settings-content">
+                    <div class="td-card td-card-body">
+                        <div class="tab-content" id="v-pills-tabContent">
+                            
+                            <!-- Profile Tab -->
+                            <div class="tab-pane fade show active" id="profile" role="tabpanel" aria-labelledby="v-pills-profile-tab">
+                                <h3 style="font-size:1.1rem; font-weight:700; margin-bottom:1.5rem; color:var(--sd-text);">Personal Information</h3>
+                                <form id="profile-form">
+                                    <div class="td-form-row">
+                                        <div class="td-form-group">
+                                            <label class="td-form-label">Full Name</label>
+                                            <input type="text" class="td-form-input" id="full-name" placeholder="Enter your full name">
+                                        </div>
+                                        <div class="td-form-group">
+                                            <label class="td-form-label">Email Address</label>
+                                            <input type="email" class="td-form-input" id="email-address" disabled>
+                                        </div>
+                                    </div>
+                                    <div class="td-form-row">
+                                        <div class="td-form-group">
+                                            <label class="td-form-label">Phone Number</label>
+                                            <input type="text" class="td-form-input" id="phone-number" placeholder="(123) 456-7890">
+                                        </div>
+                                        <div class="td-form-group">
+                                            <label class="td-form-label">Location</label>
+                                            <input type="text" class="td-form-input" id="location" placeholder="e.g. San Francisco, CA">
+                                        </div>
+                                    </div>
+                                    <div class="td-form-group" style="max-width: 400px;">
+                                        <label class="td-form-label">School ID (District / Institution)</label>
+                                        <input type="text" class="td-form-input" id="schoolId" placeholder="e.g. SCH-9982">
+                                        <span style="font-size:0.75rem; color:var(--sd-text-3);">Used to link your data to your school administrator's dashboard.</span>
+                                    </div>
+                                    <div class="td-form-group">
+                                        <label class="td-form-label">Bio</label>
+                                        <textarea class="td-form-input" id="bio" rows="4" placeholder="Tell us about yourself..."></textarea>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <!-- Account Tab -->
+                            <div class="tab-pane fade" id="account" role="tabpanel" aria-labelledby="v-pills-account-tab">
+                                <h3 style="font-size:1.1rem; font-weight:700; margin-bottom:1.5rem; color:var(--sd-text);">Change Password</h3>
+                                <form>
+                                    <div class="td-form-group" style="max-width:400px;">
+                                        <label class="td-form-label">Current Password</label>
+                                        <input type="password" class="td-form-input">
+                                    </div>
+                                    <div class="td-form-row">
+                                        <div class="td-form-group">
+                                            <label class="td-form-label">New Password</label>
+                                            <input type="password" class="td-form-input">
+                                        </div>
+                                        <div class="td-form-group">
+                                            <label class="td-form-label">Confirm New Password</label>
+                                            <input type="password" class="td-form-input">
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <!-- Notifications Tab -->
+                            <div class="tab-pane fade" id="notifications" role="tabpanel" aria-labelledby="v-pills-notifications-tab">
+                                <h3 style="font-size:1.1rem; font-weight:700; margin-bottom:1.5rem; color:var(--sd-text);">Notification Preferences</h3>
+                                
+                                <div class="td-toggle-row">
+                                    <div class="td-toggle-label">Email Notifications<br><span style="font-size:0.75rem; color:var(--sd-text-3); font-weight:400;">Receive updates via email</span></div>
+                                    <label class="td-toggle">
+                                        <input type="checkbox" id="emailNotifications" checked>
+                                        <span class="td-toggle-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="td-toggle-row">
+                                    <div class="td-toggle-label">Test Reminders<br><span style="font-size:0.75rem; color:var(--sd-text-3); font-weight:400;">Get alerts for pending tests</span></div>
+                                    <label class="td-toggle">
+                                        <input type="checkbox" id="testReminders" checked>
+                                        <span class="td-toggle-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="td-toggle-row">
+                                    <div class="td-toggle-label">Promotional Emails<br><span style="font-size:0.75rem; color:var(--sd-text-3); font-weight:400;">Receive marketing and feature updates</span></div>
+                                    <label class="td-toggle">
+                                        <input type="checkbox" id="promotionalEmails">
+                                        <span class="td-toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Booking Services Tab -->
+                            <div class="tab-pane fade" id="booking" role="tabpanel" aria-labelledby="v-pills-booking-tab">
+                                <h3 style="font-size:1.1rem; font-weight:700; margin-bottom:1.5rem; color:var(--sd-text);">1-on-1 Assessment Services</h3>
+                                
+                                <div class="td-toggle-row" style="margin-bottom: 2rem;">
+                                    <div class="td-toggle-label">Enable Public Profile<br><span style="font-size:0.75rem; color:var(--sd-text-3); font-weight:400;">Allow parents to discover you and book assessments.</span></div>
+                                    <label class="td-toggle">
+                                        <input type="checkbox" id="bookingEnabled">
+                                        <span class="td-toggle-slider"></span>
+                                    </label>
+                                </div>
+
+                                <div class="td-form-row">
+                                    <div class="td-form-group">
+                                        <label class="td-form-label">Price per Session (USD)</label>
+                                        <div style="position:relative;">
+                                            <span style="position:absolute; left:1rem; top:50%; transform:translateY(-50%); color:var(--sd-text-3); font-weight:600;">$</span>
+                                            <input type="number" class="td-form-input" id="bookingPrice" placeholder="49" min="0" style="padding-left:2.5rem;">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="td-form-group">
+                                    <label class="td-form-label">Available Days for Assessments</label>
+                                    <div style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:0.5rem;">
+                                        <label class="td-toggle" style="background:#f1f5f9; padding:0.5rem 1rem; border-radius:8px; border:1px solid #e2e8f0; display:flex; gap:0.5rem; align-items:center;">
+                                            <input type="checkbox" name="bookingDays" value="1"> Mon
+                                        </label>
+                                        <label class="td-toggle" style="background:#f1f5f9; padding:0.5rem 1rem; border-radius:8px; border:1px solid #e2e8f0; display:flex; gap:0.5rem; align-items:center;">
+                                            <input type="checkbox" name="bookingDays" value="2"> Tue
+                                        </label>
+                                        <label class="td-toggle" style="background:#f1f5f9; padding:0.5rem 1rem; border-radius:8px; border:1px solid #e2e8f0; display:flex; gap:0.5rem; align-items:center;">
+                                            <input type="checkbox" name="bookingDays" value="3"> Wed
+                                        </label>
+                                        <label class="td-toggle" style="background:#f1f5f9; padding:0.5rem 1rem; border-radius:8px; border:1px solid #e2e8f0; display:flex; gap:0.5rem; align-items:center;">
+                                            <input type="checkbox" name="bookingDays" value="4"> Thu
+                                        </label>
+                                        <label class="td-toggle" style="background:#f1f5f9; padding:0.5rem 1rem; border-radius:8px; border:1px solid #e2e8f0; display:flex; gap:0.5rem; align-items:center;">
+                                            <input type="checkbox" name="bookingDays" value="5"> Fri
+                                        </label>
+                                        <label class="td-toggle" style="background:#f1f5f9; padding:0.5rem 1rem; border-radius:8px; border:1px solid #e2e8f0; display:flex; gap:0.5rem; align-items:center;">
+                                            <input type="checkbox" name="bookingDays" value="6"> Sat
+                                        </label>
+                                        <label class="td-toggle" style="background:#f1f5f9; padding:0.5rem 1rem; border-radius:8px; border:1px solid #e2e8f0; display:flex; gap:0.5rem; align-items:center;">
+                                            <input type="checkbox" name="bookingDays" value="0"> Sun
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+</div>
+
+<style>
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module">
+        import { auth, db } from './js/firebase-config.js';
+        import { requireAuth } from './js/auth-check.js';
+        import { signOut } from 'https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js';
+        import { doc, getDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js';
+
+        async function initSettings() {
+            try {
+                const { user } = await requireAuth(['teacher', 'admin']);
+
+                // Fetch teacher doc
+                const teacherDocRef = doc(db, 'teachers', user.uid);
+                const teacherDoc = await getDoc(teacherDocRef);
+
+                if (teacherDoc.exists()) {
+                    const teacherData = teacherDoc.data();
+                    const teacherName = teacherData.name || user.displayName || 'Teacher';
+
+                    document.getElementById('sidebar-teacher-name').textContent = teacherName;
+                    document.getElementById('profile-name').textContent = teacherName;
+                    document.getElementById('full-name').value = teacherData.name || '';
+                    document.getElementById('email-address').value = user.email || '';
+                    document.getElementById('phone-number').value = teacherData.phone || '';
+                    document.getElementById('location').value = teacherData.location || '';
+                    document.getElementById('bio').value = teacherData.bio || '';
+                    document.getElementById('schoolId').value = teacherData.schoolId || '';
+                    
+                    // Booking settings
+                    document.getElementById('bookingEnabled').checked = teacherData.bookingEnabled || false;
+                    document.getElementById('bookingPrice').value = teacherData.bookingPrice || '';
+                    if (teacherData.bookingDays && Array.isArray(teacherData.bookingDays)) {
+                        document.querySelectorAll('input[name="bookingDays"]').forEach(cb => {
+                            if (teacherData.bookingDays.includes(parseInt(cb.value))) { cb.checked = true; }
+                        });
+                    }
+
+                    const avatarURL = teacherData.photoURL || user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(teacherName)}&background=4a6cf7&color=fff`;
+                    const avatarEls = [document.getElementById('user-avatar'), document.getElementById('user-avatar-sidebar'), document.getElementById('profile-pic')];
+                    avatarEls.forEach(el => { if (el) el.src = avatarURL; });
+                }
+
+                // Events
+                const saveBtn = document.getElementById('saveChangesBtn');
+                if (saveBtn) {
+                    saveBtn.addEventListener('click', async () => {
+                        const selectedDays = Array.from(document.querySelectorAll('input[name="bookingDays"]:checked')).map(cb => parseInt(cb.value));
+                        
+                        const updatedData = {
+                            name: document.getElementById('full-name').value,
+                            phone: document.getElementById('phone-number').value,
+                            location: document.getElementById('location').value,
+                            bio: document.getElementById('bio').value,
+                            schoolId: document.getElementById('schoolId').value,
+                            bookingEnabled: document.getElementById('bookingEnabled').checked,
+                            bookingPrice: parseInt(document.getElementById('bookingPrice').value) || 0,
+                            bookingDays: selectedDays
+                        };
+                        try {
+                            await updateDoc(teacherDocRef, updatedData);
+                            alert('Settings saved!');
+                            document.getElementById('sidebar-teacher-name').textContent = updatedData.name;
+                            document.getElementById('profile-name').textContent = updatedData.name;
+                        } catch (e) { console.error(e); alert('Error saving'); }
+                    });
+                }
+
+                const logoutBtn = document.getElementById('logout-btn');
+                if (logoutBtn) {
+                    const newLogout = logoutBtn.cloneNode(true);
+                    logoutBtn.parentNode.replaceChild(newLogout, logoutBtn);
+                    newLogout.addEventListener('click', async () => {
+                        await signOut(auth);
+                        window.location.href = 'auth/login-fixed.html';
+                    });
+                }
+
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', initSettings);
+    </script>
+    <!-- Standard Mobile Sidebar Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebar = document.getElementById('sidebar');
+            const sidebarToggle = document.getElementById('sidebar-toggle');
+            const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+            if (sidebarToggle && sidebar) {
+                sidebarToggle.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    sidebar.classList.toggle('active');
+                    if (sidebarOverlay) sidebarOverlay.classList.toggle('active');
+                });
+            }
+
+            if (sidebarOverlay && sidebar) {
+                sidebarOverlay.addEventListener('click', () => {
+                    sidebar.classList.remove('active');
+                    sidebarOverlay.classList.remove('active');
+                });
+            }
+        });
+    </script>
+</body>

@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Tests — Alpharia</title>
+  <meta name="description" content="Browse and start your reading assessments and test assignments.">
+
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Shared Dashboard Styles -->
+  <link rel="stylesheet" href="css/student-dashboard-clean.css">
+
+  <style>
+    /* ── Tests-page specific styles ── */
+
+    /* Page header */
+    .st-page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .st-page-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--sd-text);
+      letter-spacing: -0.5px;
+    }
+
+    .st-page-title span {
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--sd-text-3);
+      margin-left: 0.5rem;
+      letter-spacing: 0;
+    }
+
+    /* Section divider label */
+    .st-section-label {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      margin: 0.5rem 0 1.2rem;
+    }
+
+    .st-section-label-icon {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+
+    .st-section-label-text {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--sd-text);
+    }
+
+    .st-section-label-sub {
+      font-size: 0.78rem;
+      color: var(--sd-text-3);
+      margin-left: 0.25rem;
+    }
+
+    .st-section-divider {
+      flex: 1;
+      height: 1px;
+      background: var(--sd-border);
+    }
+
+    /* Filter pill bar */
+    .st-filters {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .st-filter-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.45rem 1rem;
+      border-radius: 50px;
+      font-family: var(--sd-font);
+      font-size: 0.83rem;
+      font-weight: 600;
+      border: 1.5px solid var(--sd-border);
+      background: var(--sd-surface);
+      color: var(--sd-text-2);
+      cursor: pointer;
+      transition: var(--sd-transition);
+      outline: none;
+    }
+
+    .st-filter-pill:hover {
+      border-color: var(--sd-primary);
+      color: var(--sd-primary);
+      background: var(--sd-primary-lt);
+    }
+
+    .st-filter-pill.active {
+      background: var(--sd-primary);
+      color: white;
+      border-color: var(--sd-primary);
+      box-shadow: 0 4px 10px rgba(79,70,229,.3);
+    }
+
+    /* Tests grid */
+    .st-tests-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.25rem;
+    }
+
+    /* Test card */
+    .st-test-card {
+      background: var(--sd-surface);
+      border: 1.5px solid var(--sd-border);
+      border-radius: var(--sd-radius);
+      display: flex;
+      flex-direction: column;
+      transition: var(--sd-transition);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .st-test-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--sd-primary);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.35s ease;
+    }
+
+    .st-test-card:hover {
+      border-color: transparent;
+      box-shadow: var(--sd-shadow-md);
+      transform: translateY(-3px);
+    }
+
+    .st-test-card:hover::before { transform: scaleX(1); }
+
+    .st-test-card.placement::before { background: linear-gradient(90deg, #4f46e5, #14b8a6); }
+    .st-test-card.available::before { background: var(--sd-primary); }
+    .st-test-card.completed::before { background: var(--sd-green); }
+    .st-test-card.in-progress::before { background: var(--sd-amber); }
+    .st-test-card.expired::before { background: var(--sd-text-3); }
+
+    .st-test-card-body {
+      padding: 1.4rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .st-test-card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.6rem;
+    }
+
+    .st-test-name {
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: var(--sd-text);
+      line-height: 1.35;
+    }
+
+    .st-test-desc {
+      font-size: 0.82rem;
+      color: var(--sd-text-3);
+      line-height: 1.55;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .st-test-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .st-test-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.77rem;
+      color: var(--sd-text-3);
+      font-weight: 500;
+    }
+
+    .st-test-meta-item i { font-size: 0.7rem; }
+
+    /* Status badge on card */
+    .st-status-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.25rem 0.65rem;
+      border-radius: 20px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .chip-available   { background: rgba(79,70,229,.1);  color: #4f46e5; }
+    .chip-completed   { background: rgba(16,185,129,.1); color: #059669; }
+    .chip-in-progress { background: rgba(245,158,11,.1); color: #d97706; }
+    .chip-upcoming    { background: rgba(148,163,184,.1); color: #64748b; }
+    .chip-expired     { background: rgba(239,68,68,.1);  color: #dc2626; }
+
+    /* Score bar inside card */
+    .st-card-score {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .st-card-pct {
+      font-size: 1.1rem;
+      font-weight: 800;
+      min-width: 3rem;
+      text-align: right;
+    }
+
+    .st-test-card-footer {
+      padding: 0.9rem 1.4rem;
+      border-top: 1px solid var(--sd-border);
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .st-test-card-footer .sd-btn { flex: 1; justify-content: center; font-size: 0.83rem; }
+
+    /* Placement card special styling */
+    .st-test-card.placement {
+      border-color: rgba(79,70,229,.25);
+      background: linear-gradient(145deg, #fafaff, #f5f3ff);
+    }
+
+    .st-placement-badge {
+      position: absolute;
+      top: 12px; right: 12px;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: white;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Loading spinner */
+    .st-loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 1rem;
+      gap: 0.75rem;
+      color: var(--sd-text-3);
+    }
+
+    .st-spinner {
+      width: 30px; height: 30px;
+      border: 3px solid var(--sd-border);
+      border-top-color: var(--sd-primary);
+      border-radius: 50%;
+      animation: st-spin 0.8s linear infinite;
+    }
+
+    @keyframes st-spin { to { transform: rotate(360deg); } }
+
+    /* Search bar inside body (above filters) */
+    .st-search {
+      position: relative;
+      max-width: 340px;
+    }
+
+    .st-search i {
+      position: absolute;
+      left: 0.9rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--sd-text-3);
+      font-size: 0.85rem;
+      pointer-events: none;
+    }
+
+    .st-search input {
+      width: 100%;
+      border: 1.5px solid var(--sd-border);
+      border-radius: 10px;
+      background: var(--sd-surface);
+      color: var(--sd-text);
+      font-family: var(--sd-font);
+      font-size: 0.88rem;
+      padding: 0.55rem 1rem 0.55rem 2.5rem;
+      outline: none;
+      transition: var(--sd-transition);
+    }
+
+    .st-search input::placeholder { color: var(--sd-text-3); }
+
+    .st-search input:focus {
+      border-color: var(--sd-primary);
+      box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+    }
+
+    /* Controls bar */
+    .st-controls {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 600px) {
+      .st-tests-grid { grid-template-columns: 1fr; }
+      .st-search { max-width: 100%; }
+      .st-controls { flex-direction: column; align-items: stretch; }
+    }
+  </style>
+</head>
+
+<body class="sd-page">
+<div class="sd-shell">
+
+  <!-- ═══════════ SIDEBAR ═══════════ -->
+  <aside class="sd-sidebar" id="sd-sidebar" aria-label="Main navigation">
+
+    <a href="index.html" class="sd-sidebar-brand" aria-label="Alpharia home">
+      <div class="sd-brand-icon"><i class="fas fa-book-reader"></i></div>
+      <span class="sd-brand-text">Alpharia</span>
+    </a>
+
+    <nav class="sd-nav" aria-label="Dashboard navigation">
+      <span class="sd-nav-section-label">Main</span>
+
+      <a href="student-dashboard.html" class="sd-nav-link">
+        <i class="fas fa-home"></i><span>Overview</span>
+      </a>
+
+      <a href="student-tests.html" class="sd-nav-link active" aria-current="page">
+        <i class="fas fa-tasks"></i><span>My Tests</span>
+      </a>
+
+      <a href="student-progress.html" class="sd-nav-link">
+        <i class="fas fa-chart-line"></i><span>Progress</span>
+      </a>
+
+      <a href="take-reading-test.html" class="sd-nav-link">
+        <i class="fas fa-microphone-alt"></i><span>Take a Test</span>
+      </a>
+
+      <span class="sd-nav-section-label">Library</span>
+
+      <a href="#" class="sd-nav-link">
+        <i class="fas fa-book-open"></i><span>Resources</span>
+      </a>
+
+      <a href="student-achievements.html" class="sd-nav-link">
+        <i class="fas fa-trophy"></i><span>Achievements</span>
+      </a>
+
+      <span class="sd-nav-section-label">Account</span>
+
+      <a href="student-settings.html" class="sd-nav-link">
+        <i class="fas fa-cog"></i><span>Settings</span>
+      </a>
+    </nav>
+
+    <div class="sd-sidebar-footer">
+      <div class="sd-sidebar-user">
+        <img src="" alt="User" class="sd-sidebar-avatar" id="sidebar-avatar">
+        <div class="sd-sidebar-user-info">
+          <div class="sd-sidebar-user-name" id="sidebar-username">Loading…</div>
+          <div class="sd-sidebar-user-role">Student</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Overlay (mobile) -->
+  <div class="sd-sidebar-overlay" id="sd-overlay" aria-hidden="true"></div>
+
+  <!-- ═══════════ MAIN ═══════════ -->
+  <div class="sd-main">
+
+    <!-- Top Bar -->
+    <header class="sd-topbar" role="banner">
+      <button class="sd-topbar-toggle" id="sd-menu-toggle" aria-label="Open navigation" aria-expanded="false">
+        <i class="fas fa-bars"></i>
+      </button>
+
+      <div class="sd-search" role="search" style="max-width:360px;">
+        <i class="fas fa-search" aria-hidden="true"></i>
+        <input type="text" id="search-tests" placeholder="Search tests…" aria-label="Search tests">
+      </div>
+
+      <div class="sd-topbar-actions">
+        <button class="sd-icon-btn" aria-label="Refresh tests" id="refresh-tests" title="Refresh">
+          <i class="fas fa-sync-alt"></i>
+        </button>
+        <button class="sd-icon-btn" aria-label="Notifications" title="Notifications">
+          <i class="fas fa-bell"></i>
+          <span class="sd-notif-badge" aria-label="Notifications">0</span>
+        </button>
+        <div class="sd-avatar-btn" title="Your profile">
+          <img src="" alt="User avatar" id="user-avatar" width="38" height="38">
+        </div>
+      </div>
+    </header>
+
+    <!-- Page Body -->
+    <main class="sd-body">
+
+      <!-- Page header & controls -->
+      <div class="st-page-header">
+        <h1 class="st-page-title">
+          My Tests
+          <span id="total-tests-count"></span>
+        </h1>
+        <div class="st-controls">
+          <div class="st-search" style="max-width:280px;">
+            <i class="fas fa-search"></i>
+            <input type="text" id="search-tests-body" placeholder="Search tests…" aria-label="Search by name">
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter pills -->
+      <div class="st-filters" role="group" aria-label="Test status filters">
+        <button class="st-filter-pill active" data-filter="all">
+          <i class="fas fa-th-large"></i> All Tests
+        </button>
+        <button class="st-filter-pill" data-filter="available">
+          <i class="fas fa-play-circle"></i> Available
+        </button>
+        <button class="st-filter-pill" data-filter="in-progress">
+          <i class="fas fa-spinner"></i> In Progress
+        </button>
+        <button class="st-filter-pill" data-filter="completed">
+          <i class="fas fa-check-circle"></i> Completed
+        </button>
+      </div>
+
+      <!-- ── PLACEMENT TESTS SECTION ── -->
+      <div id="placement-section">
+        <div class="st-section-label">
+          <div class="st-section-label-icon" style="background:rgba(79,70,229,.1);color:#4f46e5;">
+            <i class="fas fa-compass"></i>
+          </div>
+          <div>
+            <span class="st-section-label-text">Placement Tests</span>
+            <span class="st-section-label-sub">— Assess your reading level</span>
+          </div>
+          <div class="st-section-divider"></div>
+        </div>
+        <div class="st-tests-grid" id="placement-tests-container">
+          <div class="st-loading">
+            <div class="st-spinner"></div>
+            <span>Loading placement tests…</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── MY ASSIGNMENTS SECTION ── -->
+      <div id="assignments-section">
+        <div class="st-section-label">
+          <div class="st-section-label-icon" style="background:rgba(20,184,166,.1);color:#14b8a6;">
+            <i class="fas fa-book-open"></i>
+          </div>
+          <div>
+            <span class="st-section-label-text">My Assignments</span>
+            <span class="st-section-label-sub">— Teacher-assigned tests</span>
+          </div>
+          <div class="st-section-divider"></div>
+        </div>
+        <div class="st-tests-grid" id="tests-container">
+          <div class="st-loading">
+            <div class="st-spinner"></div>
+            <span>Loading assignments…</span>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div><!-- /sd-main -->
+</div><!-- /sd-shell -->
+
+
+<!-- ══════════════════════════════════
+     TEST DETAILS MODAL
+══════════════════════════════════ -->
+<div class="sd-modal-backdrop" id="test-details-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="sd-modal">
+    <div class="sd-modal-header">
+      <div class="sd-modal-title" id="modal-title">
+        <i class="fas fa-clipboard-list"></i>
+        <span id="test-details-title">Test Results</span>
+      </div>
+      <button class="sd-modal-close" onclick="closeTestDetailsModal()" aria-label="Close">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="sd-modal-body">
+      <div class="sd-score-summary">
+        <div class="sd-score-box">
+          <div class="sd-score-box-label">Score</div>
+          <div class="sd-score-box-val" id="test-total-score">—</div>
+        </div>
+        <div class="sd-score-box">
+          <div class="sd-score-box-label">Max Score</div>
+          <div class="sd-score-box-val" id="test-total-possible">—</div>
+        </div>
+        <div class="sd-score-box">
+          <div class="sd-score-box-label">Overall %</div>
+          <div class="sd-score-box-val" id="test-percentage" style="color:var(--sd-primary);">—</div>
+        </div>
+      </div>
+
+      <div style="font-size:0.8rem;font-weight:700;color:var(--sd-text-3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.75rem;">
+        Section Breakdown
+      </div>
+      <div id="sections-summary"></div>
+    </div>
+
+    <div class="sd-modal-footer">
+      <button class="sd-btn sd-btn-outline" onclick="closeTestDetailsModal()" id="closeTestDetailsBtn">
+        Close
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════
+     SCRIPTS
+══════════════════════════════════ -->
+
+<!-- Mobile sidebar toggle -->
+<script>
+(function () {
+  var sidebar = document.getElementById('sd-sidebar');
+  var overlay = document.getElementById('sd-overlay');
+  var toggle  = document.getElementById('sd-menu-toggle');
+
+  function openSidebar()  {
+    sidebar.classList.add('open');
+    overlay.classList.add('open');
+    toggle.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('open');
+    toggle.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  }
+
+  if (toggle)  toggle.addEventListener('click', function () {
+    sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
+  });
+  if (overlay) overlay.addEventListener('click', closeSidebar);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeSidebar(); });
+
+  /* Sync both search inputs */
+  var topSearch  = document.getElementById('search-tests');
+  var bodySearch = document.getElementById('search-tests-body');
+  if (topSearch && bodySearch) {
+    topSearch.addEventListener('input',  function () { bodySearch.value = topSearch.value;  });
+    bodySearch.addEventListener('input', function () { topSearch.value  = bodySearch.value; });
+  }
+})();
+</script>
+
+<!-- Firebase + Page Logic (original, fully preserved + redesigned output) -->
+<script type="module">
+  import { app, auth, db } from './js/firebase-config.js';
+  import { requireAuth } from './js/auth-check.js';
+  import {
+    doc, getDoc, collection, query, where, orderBy, limit,
+    getDocs, updateDoc, addDoc, setDoc, serverTimestamp
+  } from 'https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js';
+
+  window.formatDate = formatDate;
+
+  /* ── DOM refs ── */
+  const testsContainer     = document.getElementById('tests-container');
+  const placementContainer = document.getElementById('placement-tests-container');
+  const placementSection   = document.getElementById('placement-section');
+  const searchInputTop     = document.getElementById('search-tests');
+  const searchInputBody    = document.getElementById('search-tests-body');
+  const filterButtons      = document.querySelectorAll('.st-filter-pill');
+  const refreshButton      = document.getElementById('refresh-tests');
+  const totalCount         = document.getElementById('total-tests-count');
+
+  let currentFilter = 'all';
+  let currentSearch = '';
+  let currentUser   = null;
+
+  /* ── Init ── */
+  document.addEventListener('DOMContentLoaded', async () => {
+    try {
+      const { user } = await requireAuth(['student']);
+      currentUser = user;
+      await loadUserData(user);
+      await loadTests(user.uid);
+
+      /* Search */
+      function handleSearch(e) {
+        currentSearch = e.target.value.toLowerCase();
+        searchInputTop.value  = currentSearch;
+        searchInputBody.value = currentSearch;
+        loadTests(user.uid);
+      }
+      if (searchInputTop)  searchInputTop.addEventListener('input',  handleSearch);
+      if (searchInputBody) searchInputBody.addEventListener('input', handleSearch);
+
+      /* Filter pills */
+      filterButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          filterButtons.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentFilter = btn.dataset.filter;
+          loadTests(user.uid);
+        });
+      });
+
+      /* Refresh */
+      if (refreshButton) {
+        refreshButton.addEventListener('click', async () => {
+          refreshButton.querySelector('i').classList.add('fa-spin');
+          await loadTests(user.uid);
+          refreshButton.querySelector('i').classList.remove('fa-spin');
+        });
+      }
+    } catch (e) { console.error('Auth error', e); }
+  });
+
+  /* ── Load user data ── */
+  async function loadUserData(user) {
+    try {
+      const userDocRef = doc(db, 'students', user.uid);
+      const userDoc    = await getDoc(userDocRef);
+      if (userDoc.exists()) {
+        const userData   = userDoc.data();
+        const displayName = userData.name || user.displayName || 'Student';
+        const sidebarUsername = document.getElementById('sidebar-username');
+        const userAvatar      = document.getElementById('user-avatar');
+        const sidebarAvatar   = document.getElementById('sidebar-avatar');
+
+        if (sidebarUsername) sidebarUsername.textContent = displayName;
+
+        const photoSrc = userData.photoURL || user.photoURL ||
+          `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=4f46e5&color=fff`;
+        if (userAvatar)    userAvatar.src    = photoSrc;
+        if (sidebarAvatar) sidebarAvatar.src = photoSrc;
+      }
+    } catch (err) { console.error('Error loading user data:', err); }
+  }
+
+  /* ── Load & process all tests ── */
+  async function loadTests(userId) {
+    showLoading();
+
+    try {
+      const testsSnap    = await getDocs(collection(db, 'tests'));
+      const attemptsSnap = await getDocs(collection(db, 'students', userId, 'testAttempts'));
+
+      const attemptsMap = new Map();
+      attemptsSnap.forEach(d => {
+        const a = { id: d.id, ...d.data() };
+        if (a.testId) attemptsMap.set(a.testId, a);
+      });
+
+      const now   = new Date();
+      let tests   = [];
+
+      testsSnap.forEach(d => {
+        const test    = { id: d.id, ...d.data() };
+        const attempt = attemptsMap.get(d.id);
+
+        let status      = 'available';
+        let statusText  = 'Available';
+        let score       = null;
+
+        if (attempt) {
+          if (attempt.status === 'completed') {
+            status     = 'completed';
+            statusText = 'Completed';
+            score      = attempt.percentage || 0;
+          } else if (attempt.status === 'in-progress') {
+            status     = 'in-progress';
+            statusText = 'In Progress';
+          }
+        }
+
+        if (test.startDate) {
+          const sd = test.startDate.toDate ? test.startDate.toDate() : new Date(test.startDate);
+          if (now < sd) { status = 'upcoming';  statusText = `Starts ${formatDate(sd)}`; }
+        }
+        if (test.endDate) {
+          const ed = test.endDate.toDate ? test.endDate.toDate() : new Date(test.endDate);
+          if (now > ed) { status = 'expired';   statusText = 'Expired'; }
+        }
+
+        tests.push({ ...test, attempt, status, statusText, score });
+      });
+
+      /* Apply search */
+      if (currentSearch) {
+        tests = tests.filter(t =>
+          (t.title || '').toLowerCase().includes(currentSearch) ||
+          (t.description || '').toLowerCase().includes(currentSearch)
+        );
+      }
+
+      /* Apply filter */
+      if (currentFilter !== 'all') {
+        tests = tests.filter(t => t.status === currentFilter);
+      }
+
+      /* Sort */
+      const order = { available: 1, 'in-progress': 2, completed: 3, upcoming: 4, expired: 5 };
+      tests.sort((a, b) => (order[a.status] || 9) - (order[b.status] || 9));
+
+      if (totalCount) totalCount.textContent = `${tests.length} test${tests.length !== 1 ? 's' : ''}`;
+
+      displayTests(tests);
+    } catch (err) {
+      console.error('Error loading tests:', err);
+      [testsContainer, placementContainer].forEach(c => {
+        if (c) c.innerHTML = errorState();
+      });
+    }
+  }
+
+  /* ── Display tests split by type ── */
+  function displayTests(allTests) {
+    const allReading  = allTests.filter(t => t.type === 'reading_assessment');
+    let placementTests = [];
+    let regularTests   = [...allTests];
+
+    if (allReading.length > 0) {
+      placementTests = [allReading[0]];
+      regularTests   = regularTests.filter(t => t.id !== allReading[0].id);
+    }
+
+    /* Placement section */
+    if (placementTests.length === 0) {
+      if (placementSection) placementSection.style.display = 'none';
+    } else {
+      if (placementSection) placementSection.style.display = '';
+      renderGrid(placementContainer, placementTests, true);
+    }
+
+    /* Assignments */
+    renderGrid(testsContainer, regularTests, false);
+  }
+
+  /* ── Render a grid of test cards ── */
+  function renderGrid(container, tests, isPlacement) {
+    if (!container) return;
+
+    if (tests.length === 0) {
+      container.innerHTML = `<div style="grid-column:1/-1;">
+        ${emptyState(isPlacement ? 'No placement test found' : 'No tests found', isPlacement
+          ? 'Your placement test will appear here when assigned.'
+          : 'Try changing your search or filter.')}</div>`;
+      return;
+    }
+
+    container.innerHTML = '';
+    tests.forEach(test => {
+      const isReading  = test.type === 'reading_assessment';
+      const baseUrl    = isReading ? 'take-reading-test.html' : 'take-test.html';
+      const testUrl    = `${baseUrl}?testId=${test.id}`;
+
+      let displayTitle = test.title || 'Untitled Test';
+      if (displayTitle.toLowerCase().includes('welcome to reading')) {
+        displayTitle = displayTitle.replace(/welcome to reading\s*[-–:]?\s*/i, '');
+      }
+
+      const duration = test.duration ? `${test.duration} min` : 'No limit';
+
+      let dateInfo = '';
+      if (test.startDate) {
+        const sd = test.startDate.toDate ? test.startDate.toDate() : new Date(test.startDate);
+        dateInfo = `Starts ${formatDate(sd)}`;
+        if (test.endDate) {
+          const ed = test.endDate.toDate ? test.endDate.toDate() : new Date(test.endDate);
+          dateInfo += ` · Due ${formatDate(ed)}`;
+        }
+      }
+
+      const chipClass = {
+        available: 'chip-available', completed: 'chip-completed',
+        'in-progress': 'chip-in-progress', upcoming: 'chip-upcoming', expired: 'chip-expired'
+      }[test.status] || 'chip-available';
+
+      const scoreHtml = test.status === 'completed' && test.score !== null ? `
+        <div class="st-card-score">
+          <div class="sd-progress" style="flex:1;">
+            <div class="sd-progress-fill ${test.score >= 70 ? 'pf-green' : test.score >= 50 ? 'pf-amber' : ''}"
+                 style="width:${test.score}%;"></div>
+          </div>
+          <span class="st-card-pct ${test.score >= 70 ? 'trend-up' : test.score >= 50 ? '' : 'trend-down'}">${test.score}%</span>
+        </div>` : '';
+
+      const card = document.createElement('div');
+      card.className = `st-test-card ${isPlacement ? 'placement' : ''} ${test.status}`;
+      card.innerHTML = `
+        ${isPlacement ? '<div class="st-placement-badge"><i class="fas fa-star" style="margin-right:3px;"></i>Placement</div>' : ''}
+        <div class="st-test-card-body">
+          <div class="st-test-card-top">
+            <div class="st-test-name">${displayTitle}</div>
+            <span class="st-status-chip ${chipClass}">${test.statusText}</span>
+          </div>
+          ${test.description ? `<div class="st-test-desc">${test.description}</div>` : ''}
+          <div class="st-test-meta-row">
+            <span class="st-test-meta-item"><i class="far fa-clock"></i>${duration}</span>
+            ${test.sections ? `<span class="st-test-meta-item"><i class="fas fa-layer-group"></i>${test.sections.length} sections</span>` : ''}
+            ${dateInfo ? `<span class="st-test-meta-item"><i class="far fa-calendar-alt"></i>${dateInfo}</span>` : ''}
+          </div>
+          ${scoreHtml}
+        </div>
+        <div class="st-test-card-footer">
+          ${getActionButtons(test, testUrl)}
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  /* ── Action buttons per status ── */
+  function getActionButtons(test, url) {
+    switch (test.status) {
+      case 'available':
+        return `<a href="${url}" class="sd-btn sd-btn-primary"><i class="fas fa-play"></i> Start Test</a>`;
+      case 'in-progress':
+        return `<a href="${url}" class="sd-btn" style="background:var(--sd-amber);color:white;flex:1;justify-content:center;"><i class="fas fa-redo"></i> Continue</a>`;
+      case 'completed':
+        return `<button class="sd-btn sd-btn-outline" onclick="viewTestResults('${test.id}')"><i class="fas fa-chart-bar"></i> View Results</button>`;
+      default:
+        return `<button class="sd-btn" style="background:var(--sd-surface-2);color:var(--sd-text-3);flex:1;justify-content:center;" disabled>Unavailable</button>`;
+    }
+  }
+
+  /* ── Loading / empty / error helpers ── */
+  function showLoading() {
+    const html = `<div class="st-loading"><div class="st-spinner"></div><span>Loading…</span></div>`;
+    [placementContainer, testsContainer].forEach(c => { if (c) c.innerHTML = html; });
+  }
+
+  function emptyState(title, sub) {
+    return `<div class="sd-empty">
+      <div class="sd-empty-icon"><i class="fas fa-inbox"></i></div>
+      <div class="sd-empty-title">${title}</div>
+      <div class="sd-empty-sub">${sub}</div>
+    </div>`;
+  }
+
+  function errorState() {
+    return `<div style="grid-column:1/-1;"><div class="sd-empty">
+      <div class="sd-empty-icon"><i class="fas fa-exclamation-triangle" style="color:var(--sd-red);"></i></div>
+      <div class="sd-empty-title">Failed to load tests</div>
+      <div class="sd-empty-sub">
+        <button class="sd-btn sd-btn-outline" style="margin-top:0.5rem;" onclick="window.location.reload()">
+          <i class="fas fa-sync-alt"></i> Retry
+        </button>
+      </div>
+    </div></div>`;
+  }
+
+  /* ── Format date ── */
+  function formatDate(date) {
+    if (!(date instanceof Date)) date = date.toDate ? date.toDate() : new Date(date);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+    });
+  }
+
+  /* ── Show Test Details Modal ── */
+  window.showTestDetails = function (testData) {
+    const modal    = document.getElementById('test-details-modal');
+    const titleEl  = document.getElementById('test-details-title');
+    const scoreEl  = document.getElementById('test-total-score');
+    const possEl   = document.getElementById('test-total-possible');
+    const pctEl    = document.getElementById('test-percentage');
+    const secEl    = document.getElementById('sections-summary');
+
+    if (!modal || !testData?.attempt) return;
+
+    const att = testData.attempt;
+    let totalScore   = 0;
+    let totalPossible = 0;
+
+    if (att.sections && Array.isArray(att.sections)) {
+      att.sections.forEach(s => {
+        totalScore    += s.score !== undefined ? s.score : (s.items || []).filter(i => i.isCorrect).length;
+        totalPossible += s.maxPossibleScore || (s.items || []).length;
+      });
+    }
+    if (totalPossible === 0) totalPossible = 1;
+
+    const pct = att.percentage || Math.round((totalScore / totalPossible) * 100);
+
+    titleEl.textContent = att.testTitle || testData.title || 'Test Details';
+    scoreEl.textContent  = totalScore;
+    possEl.textContent   = totalPossible;
+    pctEl.textContent    = pct + '%';
+    pctEl.style.color    = pct >= 70 ? 'var(--sd-green)' : pct >= 50 ? 'var(--sd-amber)' : 'var(--sd-red)';
+
+    secEl.innerHTML = '';
+    if (att.sections && Array.isArray(att.sections)) {
+      att.sections.forEach((s, i) => {
+        const name  = s.sectionTitle || `Section ${i + 1}`;
+        const items = s.items || [];
+        const sScore = s.score !== undefined ? s.score : items.filter(it => it.isCorrect).length;
+        const sPoss  = s.maxPossibleScore || items.length || 1;
+        const sPct   = Math.min(Math.round((sScore / sPoss) * 100), 100) || 0;
+
+        const el = document.createElement('div');
+        el.className = 'sd-section-result';
+        el.innerHTML = `
+          <div class="sd-section-result-header">
+            <div class="sd-section-result-name">${name}</div>
+            <span class="sd-score-chip ${sPct >= 70 ? 'score-high' : sPct >= 50 ? 'score-medium' : 'score-low'}">${sPct}%</span>
+          </div>
+          <div class="sd-progress">
+            <div class="sd-progress-fill ${sPct >= 70 ? 'pf-green' : sPct >= 50 ? 'pf-amber' : ''}" style="width:${sPct}%;"></div>
+          </div>
+          <div class="sd-section-result-meta">Score: ${sScore}/${sPoss} · ${items.length} items</div>
+        `;
+        secEl.appendChild(el);
+      });
+    }
+
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  };
+
+  /* ── Close Modal ── */
+  window.closeTestDetailsModal = function () {
+    const modal = document.getElementById('test-details-modal');
+    if (modal) { modal.classList.remove('open'); document.body.style.overflow = ''; }
+    return false;
+  };
+
+  document.getElementById('test-details-modal').addEventListener('click', function (e) {
+    if (e.target === this) closeTestDetailsModal();
+  });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeTestDetailsModal(); });
+
+  /* ── View test results (fetch from Firestore then show modal) ── */
+  window.viewTestResults = async function (testId) {
+    try {
+      const user = auth.currentUser;
+      if (!user) throw new Error('User not authenticated');
+
+      const testDoc = await getDoc(doc(db, 'tests', testId));
+      if (!testDoc.exists()) throw new Error('Test not found');
+
+      const testData = testDoc.data();
+      const attSnap  = await getDocs(query(
+        collection(db, 'students', user.uid, 'testAttempts'),
+        where('testId', '==', testId),
+        orderBy('submittedAt', 'desc'),
+        limit(1)
+      ));
+
+      if (attSnap.empty) throw new Error('No attempts found');
+
+      const attempt = { id: attSnap.docs[0].id, ...attSnap.docs[0].data() };
+      showTestDetails({
+        ...testData, id: testDoc.id,
+        attempt: {
+          ...attempt,
+          testTitle:       testData.title || 'Test',
+          totalScore:      attempt.score || 0,
+          maxPossibleScore: attempt.maxPossibleScore || 1,
+          percentage:      attempt.percentage || 0,
+          sections:        Array.isArray(attempt.sections) ? attempt.sections : []
+        }
+      });
+    } catch (err) {
+      console.error('Error in viewTestResults:', err);
+      alert('Error loading test details. Please check the console for more details.');
+    }
+  };
+
+  window.retakeTest = function (testId) {
+    if (confirm('Are you sure you want to retake this test? Your previous attempt will be archived.')) {
+      window.location.href = `take-test.html?testId=${testId}&retake=true`;
+    }
+  };
+
+  /* ── Bootstrap ── */
+  requireAuth(['student'])
+    .catch(err => console.error('Auth Check Failed:', err));
+</script>
+
+</body>
+</html>
