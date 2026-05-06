@@ -616,60 +616,161 @@
     /* ── Responsive ── */
     @media (max-width: 768px) {
       .rt-float-bar { left: 0; padding: 0.5rem 1rem; }
+      .rt-test-header { padding: 0.75rem 1rem; gap: 0.5rem; }
+      .rt-test-title { font-size: 0.95rem; }
+      .rt-breadcrumb { display: none; }
     }
+
     @media (max-width: 600px) {
-      .rt-chat-card { padding: 2rem 1.25rem 1.75rem; }
-      .rt-bubble { font-size: 1rem; padding: 1.1rem 1.2rem; }
-      .question-container { padding: 1.25rem 1rem; }
-      .question-title { font-size: 1.1rem; padding-left: 0.8rem; }
-      .question-points { font-size: 0.8rem; padding: 0.35rem 0.8rem; min-width: auto; }
+      .rt-chat-card { padding: 1.5rem 1rem 1.25rem; border-radius: 16px; }
+      .rt-avatar-wrap { width: 60px; height: 60px; font-size: 1.5rem; margin-bottom: 1rem; }
+      .rt-avatar-wrap::after { inset: -4px; }
+      .rt-bubble { font-size: 0.92rem; padding: 0.9rem 1rem; margin-bottom: 1.25rem; line-height: 1.5; }
+      .rt-ai-label { font-size: 0.62rem; margin-bottom: 0.75rem; }
+
+      /* ═══ CRITICAL: Make question container compact ═══ */
+      .question-container {
+        padding: 1rem 0.75rem !important;
+        margin: 0.75rem auto !important;
+        border-radius: 12px;
+        width: 98% !important;
+      }
+
+      .question-header {
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.5rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.4rem;
+      }
+      .question-title {
+        font-size: 0.85rem;
+        padding-left: 0.7rem;
+        letter-spacing: 0;
+      }
+      .question-title::before { width: 3px; }
+      .question-points { font-size: 0.7rem; padding: 0.25rem 0.65rem; }
+      .rt-section-badge { font-size: 0.6rem; padding: 0.2rem 0.5rem; }
+      .rt-item-counter { font-size: 0.7rem; }
+
+      /* ═══ Prompt text — smaller on mobile ═══ */
       .prompt-text {
-        padding: 1.25rem 1rem;
-        min-height: 100px;
-        margin: 1rem 0;
-        word-break: normal;
-        overflow-wrap: break-word;
-        hyphens: none;
+        padding: 0.75rem 0.5rem !important;
+        min-height: 60px !important;
+        margin: 0.5rem 0 !important;
+        border-radius: 8px;
       }
-      .prompt-text[data-type="letter"]   { font-size: clamp(3rem, 15vw, 5rem); letter-spacing: 2px; }
-      .prompt-text[data-type="word"]     { font-size: clamp(1.8rem, 9vw, 2.8rem); letter-spacing: 0; }
-      .prompt-text[data-type="sentence"] { font-size: clamp(1.2rem, 5vw, 1.8rem); }
-      .prompt-text[data-type="passage"]  { font-size: clamp(0.95rem, 3.5vw, 1.3rem); }
+      .prompt-text[data-type="letter"]   { font-size: clamp(2.5rem, 14vw, 4.5rem) !important; letter-spacing: 2px; }
+      .prompt-text[data-type="word"]     { font-size: clamp(1.6rem, 8vw, 2.5rem) !important; letter-spacing: 0; }
+      .prompt-text[data-type="sentence"] { font-size: clamp(1rem, 4.5vw, 1.6rem) !important; }
+      .prompt-text[data-type="passage"]  { font-size: clamp(0.85rem, 3.2vw, 1.15rem) !important; }
 
-      .rt-float-bar { flex-wrap: wrap; gap: 0.5rem; justify-content: center; }
+      /* ═══ Mic button — always reachable ═══ */
+      .rt-mic-wrap { margin: 0.5rem 0 0.25rem; gap: 0.4rem; }
+      .rt-mic-btn { width: 52px; height: 52px; font-size: 1rem; }
+      .rt-mic-label { font-size: 0.68rem; }
+      .mt-4 { margin-top: 0.5rem !important; }
+      .mb-3 { margin-bottom: 0.35rem !important; }
+      .text-secondary { font-size: 0.78rem; margin-bottom: 0.25rem !important; }
+      #live-feedback { height: 18px !important; font-size: 0.72rem; }
+
+      /* Floating bar compact */
+      .rt-float-bar {
+        flex-wrap: wrap; gap: 0.35rem; justify-content: center;
+        padding: 0.4rem 0.75rem;
+      }
       .rt-fb-label { display: none; }
-      .rt-mic-btn { width: 56px; height: 56px; font-size: 1.1rem; }
+      .rt-fb-item-count { font-size: 0.65rem; padding: 0.2rem 0.5rem; }
+      .rt-fb-pts-val { font-size: 0.9rem; }
+      .rt-fb-pts-icon { width: 22px; height: 22px; font-size: 0.65rem; }
 
-      /* Modal fixes for small screens */
-      #section-transition-modal .modal-content {
-        padding: 1.5rem 0.75rem !important;
+      /* Passage "I'm Done" button */
+      .btn-success.btn-lg {
+        font-size: 0.88rem !important;
+        padding: 0.6rem 1rem !important;
+        margin-top: 0.75rem !important;
       }
-      #section-transition-modal .modal-body {
-        padding: 1.25rem 0.5rem !important;
-      }
-      .rt-modal-title { font-size: 1.3rem; }
-      .rt-modal-score { font-size: 0.95rem; }
-      .rt-modal-msg { font-size: 0.9rem; }
-      .rt-modal-check { width: 60px; height: 60px; font-size: 1.6rem; margin-bottom: 1rem; }
-      .rt-score-ring-wrap { width: 80px; height: 80px; }
-      .rt-stepper { gap: 0.15rem; }
-      .rt-step { width: 22px; height: 22px; font-size: 0.5rem; }
-      .rt-step-line { width: 12px; }
 
-      /* Make all tables inside modal scroll horizontally */
-      #section-score-display {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-      }
-      .rt-table {
-        font-size: 0.72rem;
-        min-width: 320px;
-      }
-      .rt-table th,
-      .rt-table td {
-        padding: 0.3rem 0.4rem !important;
-        white-space: nowrap;
-      }
+      /* Skip button */
+      .btn-outline-danger { font-size: 0.82rem; padding: 0.45rem 0.85rem; }
+
+      /* Section transition modal compact */
+      #section-transition-modal .modal-content { padding: 1.25rem 0.6rem !important; }
+      #section-transition-modal .modal-body { padding: 1rem 0.5rem !important; }
+      .rt-modal-title { font-size: 1.15rem; }
+      .rt-modal-score { font-size: 0.85rem; }
+      .rt-modal-msg { font-size: 0.82rem; margin-bottom: 1rem; }
+      .rt-modal-check { width: 56px; height: 56px; font-size: 1.4rem; margin-bottom: 0.75rem; }
+      .rt-score-ring-wrap { width: 72px; height: 72px; }
+      .rt-score-ring-pct { font-size: 1.2rem; }
+      .rt-stepper { gap: 0.1rem; margin: 0.5rem 0; }
+      .rt-step { width: 20px; height: 20px; font-size: 0.45rem; }
+      .rt-step-line { width: 10px; }
+
+      /* Tables scroll inside modal */
+      #section-score-display { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      .rt-table { font-size: 0.68rem; min-width: 300px; }
+      .rt-table th, .rt-table td { padding: 0.25rem 0.35rem !important; white-space: nowrap; }
+
+      /* Test header */
+      .rt-test-header { padding: 0.6rem 0.75rem; }
+      .rt-test-title { font-size: 0.85rem; gap: 0.4rem; }
+      .rt-timer { font-size: 0.7rem; padding: 0.2rem 0.55rem; }
+
+      /* Sentence text in passage reading */
+      .sentence-text { font-size: 1.2rem !important; line-height: 1.6 !important; }
+
+      /* DEV skip button */
+      .btn-danger.btn-sm { font-size: 0.65rem; padding: 0.2rem 0.4rem; }
+    }
+
+    /* ═══ ULTRA SMALL: phones < 480px ═══ */
+    @media (max-width: 480px) {
+      .question-container { padding: 0.75rem 0.5rem !important; margin: 0.5rem auto !important; }
+      .question-header { margin-bottom: 0.5rem; padding-bottom: 0.35rem; }
+      .question-title { font-size: 0.75rem; }
+
+      .prompt-text { min-height: 50px !important; padding: 0.6rem 0.4rem !important; }
+      .prompt-text[data-type="letter"]   { font-size: clamp(2rem, 12vw, 3.5rem) !important; }
+      .prompt-text[data-type="word"]     { font-size: clamp(1.3rem, 7vw, 2rem) !important; }
+      .prompt-text[data-type="sentence"] { font-size: clamp(0.88rem, 4vw, 1.3rem) !important; }
+      .prompt-text[data-type="passage"]  { font-size: clamp(0.78rem, 3vw, 1rem) !important; }
+
+      .rt-mic-btn { width: 48px; height: 48px; font-size: 0.9rem; }
+      .rt-mic-wrap { margin: 0.35rem 0 0.15rem; gap: 0.3rem; }
+      .text-secondary { font-size: 0.72rem; }
+
+      .rt-chat-card { padding: 1.25rem 0.75rem 1rem; }
+      .rt-bubble { font-size: 0.85rem; padding: 0.75rem 0.85rem; }
+
+      /* Greeting container — no min-height to prevent scroll */
+      #greeting-container { min-height: auto; padding: 1rem 0.5rem; }
+
+      .sentence-text { font-size: 1rem !important; }
+    }
+
+    /* ═══ TINY: phones < 400px / 360px ═══ */
+    @media (max-width: 400px) {
+      .question-container { padding: 0.5rem 0.4rem !important; }
+      .prompt-text[data-type="letter"]   { font-size: clamp(1.8rem, 11vw, 3rem) !important; }
+      .prompt-text[data-type="word"]     { font-size: clamp(1.1rem, 6vw, 1.8rem) !important; }
+      .rt-mic-btn { width: 44px; height: 44px; font-size: 0.85rem; }
+      .rt-float-bar { padding: 0.3rem 0.5rem; }
+      .rt-fb-item-count { font-size: 0.6rem; }
+      .sd-topbar { padding: 0.4rem 0.75rem; }
+    }
+
+    /* ═══ LANDSCAPE PHONES: short viewport ═══ */
+    @media (max-height: 600px) {
+      .question-container { padding: 0.5rem !important; margin: 0.25rem auto !important; }
+      .question-header { margin-bottom: 0.35rem; }
+      .prompt-text { min-height: 40px !important; padding: 0.5rem !important; margin: 0.25rem 0 !important; }
+      .rt-mic-wrap { margin: 0.25rem 0 0; }
+      .rt-mic-btn { width: 44px; height: 44px; }
+      .mt-4 { margin-top: 0.25rem !important; }
+      #greeting-container { min-height: auto; padding: 0.5rem; }
+      .rt-avatar-wrap { width: 50px; height: 50px; font-size: 1.2rem; margin-bottom: 0.5rem; }
+      .rt-bubble { margin-bottom: 0.5rem; }
     }
   </style>
 </head>
