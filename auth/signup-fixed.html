@@ -727,6 +727,9 @@
 
                     // Create student document
                     await setDoc(doc(db, 'students', user.uid), userData);
+                } else if (userType === 'parent') {
+                    // Create parent document
+                    await setDoc(doc(db, 'parents', user.uid), userData);
                 } else {
                     // Create teacher document
                     await setDoc(doc(db, 'teachers', user.uid), userData);

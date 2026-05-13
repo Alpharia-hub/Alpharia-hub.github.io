@@ -119,18 +119,18 @@
             </div>
             <div class="sr-row">
                 <div class="sr-form-group">
-                    <label class="sr-label">Province / Region *</label>
-                    <select class="sr-select" id="school-region">
-                        <option value="">Select region…</option>
-                        <option value="gauteng">Gauteng</option>
-                        <option value="western-cape">Western Cape</option>
-                        <option value="kwazulu-natal">KwaZulu-Natal</option>
-                        <option value="eastern-cape">Eastern Cape</option>
-                        <option value="free-state">Free State</option>
-                        <option value="limpopo">Limpopo</option>
-                        <option value="mpumalanga">Mpumalanga</option>
-                        <option value="north-west">North West</option>
-                        <option value="northern-cape">Northern Cape</option>
+                    <label class="sr-label">Country *</label>
+                    <select class="sr-select" id="school-country">
+                        <option value="">Select country…</option>
+                        <option value="usa">United States</option>
+                        <option value="uk">United Kingdom</option>
+                        <option value="canada">Canada</option>
+                        <option value="australia">Australia</option>
+                        <option value="south-africa">South Africa</option>
+                        <option value="new-zealand">New Zealand</option>
+                        <option value="ireland">Ireland</option>
+                        <option value="india">India</option>
+                        <option value="singapore">Singapore</option>
                         <option value="other">Other</option>
                     </select>
                 </div>
@@ -199,7 +199,7 @@
             <div style="background:var(--sd-surface-2); padding:1.25rem; border-radius:var(--sd-radius-sm); margin-bottom:1rem;">
                 <div style="font-size:0.72rem; font-weight:700; color:var(--sd-text-3); text-transform:uppercase; margin-bottom:0.5rem;">School</div>
                 <div style="font-weight:700; color:var(--sd-text);" id="confirm-school"></div>
-                <div style="font-size:0.82rem; color:var(--sd-text-2); margin-top:0.15rem;" id="confirm-region"></div>
+                <div style="font-size:0.82rem; color:var(--sd-text-2); margin-top:0.15rem;" id="confirm-country"></div>
             </div>
             <div style="background:var(--sd-surface-2); padding:1.25rem; border-radius:var(--sd-radius-sm); margin-bottom:1rem;">
                 <div style="font-size:0.72rem; font-weight:700; color:var(--sd-text-3); text-transform:uppercase; margin-bottom:0.5rem;">Administrator</div>
@@ -273,8 +273,8 @@
         // Step 1 → 2
         document.getElementById('btn-next-1').addEventListener('click', () => {
             const name = document.getElementById('school-name').value.trim();
-            const region = document.getElementById('school-region').value;
-            if (!name || !region) { alert('Please enter school name and region.'); return; }
+            const country = document.getElementById('school-country').value;
+            if (!name || !country) { alert('Please enter school name and country.'); return; }
             showStep(2);
         });
 
@@ -294,7 +294,7 @@
 
             // Fill confirm step
             document.getElementById('confirm-school').textContent = document.getElementById('school-name').value;
-            document.getElementById('confirm-region').textContent = document.getElementById('school-region').selectedOptions[0].text + ' · ' + document.getElementById('school-type').selectedOptions[0].text;
+            document.getElementById('confirm-country').textContent = document.getElementById('school-country').selectedOptions[0].text + ' · ' + document.getElementById('school-type').selectedOptions[0].text;
             document.getElementById('confirm-name').textContent = first + ' ' + last;
             document.getElementById('confirm-email').textContent = email;
 
@@ -319,7 +319,7 @@
                 const firstName = document.getElementById('admin-first').value.trim();
                 const lastName = document.getElementById('admin-last').value.trim();
                 const schoolName = document.getElementById('school-name').value.trim();
-                const region = document.getElementById('school-region').value;
+                const country = document.getElementById('school-country').value;
                 const schoolType = document.getElementById('school-type').value;
                 const address = document.getElementById('school-address').value.trim();
 
@@ -332,7 +332,7 @@
                 const schoolId = 'school_' + uid;
                 await setDoc(doc(db, 'schools', schoolId), {
                     name: schoolName,
-                    region,
+                    country,
                     type: schoolType,
                     address,
                     adminUid: uid,

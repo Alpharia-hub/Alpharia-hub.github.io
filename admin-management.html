@@ -75,6 +75,7 @@
         .am-badge-parent { background:rgba(245,158,11,0.1); color:#f59e0b; }
         .am-badge-admin { background:rgba(239,68,68,0.1); color:#ef4444; }
         .am-badge-school_admin { background:rgba(20,184,166,0.1); color:#14b8a6; }
+        .am-badge-limited_teacher { background:rgba(139,92,246,0.1); color:#8b5cf6; }
 
         .am-school-card {
             background:var(--sd-surface); border:1.5px solid var(--sd-border); border-radius:var(--sd-radius);
@@ -157,6 +158,7 @@
                     <i class="fas fa-search"></i>
                     <input type="text" class="am-search-input" id="search-input" placeholder="Search by name or email…">
                 </div>
+                <a href="school-register.html" class="sd-btn sd-btn-primary" id="add-school-btn" style="display:none; padding: 0.6rem 1.25rem; font-size: 0.85rem; text-decoration:none;"><i class="fas fa-plus" style="margin-right:0.5rem;"></i> Add School</a>
             </div>
 
             <!-- Panels -->
@@ -189,6 +191,46 @@
     </div>
 </div>
 
+<!-- Edit School Modal -->
+<div id="edit-school-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center;">
+    <div style="background:var(--sd-surface); padding:2rem; border-radius:var(--sd-radius); width:90%; max-width:500px;">
+        <h3 style="margin-top:0;">Edit School</h3>
+        <input type="hidden" id="edit-school-id">
+        <div style="margin-bottom:1rem;">
+            <label style="display:block; font-size:0.8rem; font-weight:bold; margin-bottom:0.3rem;">School Name</label>
+            <input type="text" id="edit-school-name" class="am-search-input" style="width:100%; box-sizing:border-box;">
+        </div>
+        <div style="margin-bottom:1rem;">
+            <label style="display:block; font-size:0.8rem; font-weight:bold; margin-bottom:0.3rem;">Country</label>
+            <select id="edit-school-country" class="am-search-input" style="width:100%; box-sizing:border-box;">
+                <option value="usa">United States</option>
+                <option value="uk">United Kingdom</option>
+                <option value="canada">Canada</option>
+                <option value="australia">Australia</option>
+                <option value="south-africa">South Africa</option>
+                <option value="new-zealand">New Zealand</option>
+                <option value="ireland">Ireland</option>
+                <option value="india">India</option>
+                <option value="singapore">Singapore</option>
+                <option value="other">Other</option>
+            </select>
+        </div>
+        <div style="margin-bottom:1.5rem;">
+            <label style="display:block; font-size:0.8rem; font-weight:bold; margin-bottom:0.3rem;">School Type</label>
+            <select id="edit-school-type" class="am-search-input" style="width:100%; box-sizing:border-box;">
+                <option value="primary">Primary School</option>
+                <option value="combined">Combined School</option>
+                <option value="special">Special Needs School</option>
+                <option value="private">Private Institution</option>
+            </select>
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:1rem;">
+            <button id="cancel-edit-school" class="sd-btn" style="background:transparent; border:1px solid var(--sd-border); color:var(--sd-text);">Cancel</button>
+            <button id="save-edit-school" class="sd-btn sd-btn-primary">Save Changes</button>
+        </div>
+    </div>
+</div>
+
 <script type="module">
     import { auth, db } from './js/firebase-config.js';
     import { requireAuth } from './js/auth-check.js';
@@ -217,26 +259,30 @@
             container.innerHTML = '<div class="am-empty"><i class="fas fa-inbox"></i> No users found.</div>';
             return;
         }
-        const roleColors = { student:'#3b82f6', teacher:'#8b5cf6', parent:'#f59e0b', admin:'#ef4444', school_admin:'#14b8a6' };
-        const roleIcons = { student:'fa-user-graduate', teacher:'fa-chalkboard-teacher', parent:'fa-user-friends', admin:'fa-shield-alt', school_admin:'fa-university' };
+        const roleColors = { student:'#3b82f6', teacher:'#8b5cf6', parent:'#f59e0b', admin:'#ef4444', school_admin:'#14b8a6', limited_teacher:'#8b5cf6', 'limited teacher':'#8b5cf6' };
+        const roleIcons = { student:'fa-user-graduate', teacher:'fa-chalkboard-teacher', parent:'fa-user-friends', admin:'fa-shield-alt', school_admin:'fa-university', limited_teacher:'fa-chalkboard', 'limited teacher':'fa-chalkboard' };
 
         container.innerHTML = `<div class="am-table-wrap"><table class="am-table">
-            <thead><tr><th>User</th><th>Role</th><th>School</th><th>Grade</th><th>Joined</th></tr></thead>
+            <thead><tr><th>User</th><th>Role</th><th>School</th><th>Grade</th><th>Joined</th><th style="width:50px;"></th></tr></thead>
             <tbody>${users.map(u => {
                 const role = u.role || 'unknown';
                 const color = roleColors[role] || '#64748b';
                 const icon = roleIcons[role] || 'fa-user';
                 const joined = u.createdAt?.seconds ? new Date(u.createdAt.seconds * 1000).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }) : '—';
                 const schoolName = u.schoolId ? allSchools.find(s => s.id === u.schoolId)?.name || u.schoolId : '—';
+                const badgeClass = role.replace(' ', '_');
                 return `<tr>
                     <td><div class="am-user-cell">
                         <div class="am-avatar" style="background:${color}20;color:${color};"><i class="fas ${icon}"></i></div>
                         <div><div class="am-user-name">${u.name || (u.firstName||'') + ' ' + (u.lastName||'')}</div><div class="am-user-email">${u.email || '—'}</div></div>
                     </div></td>
-                    <td><span class="am-badge am-badge-${role}">${role.replace('_',' ')}</span></td>
+                    <td><span class="am-badge am-badge-${badgeClass}">${role.replace('_',' ')}</span></td>
                     <td style="font-size:0.78rem;">${schoolName}</td>
                     <td style="font-size:0.78rem;">${u.grade || '—'}</td>
                     <td style="font-size:0.72rem; color:var(--sd-text-3);">${joined}</td>
+                    <td>
+                        <button class="sd-icon-btn delete-user-btn" data-id="${u.id}" data-role="${role}" title="Remove User" style="color:#ef4444; border:1px solid var(--sd-border); padding:0.4rem;"><i class="fas fa-trash"></i></button>
+                    </td>
                 </tr>`;
             }).join('')}</tbody></table></div>`;
     }
@@ -248,16 +294,20 @@
             return;
         }
         container.innerHTML = schools.map(s => {
-            const regionLabel = (s.region || '').replace(/-/g,' ').replace(/\b\w/g, c => c.toUpperCase());
+            const countryLabel = (s.country || '').replace(/-/g,' ').replace(/\b\w/g, c => c.toUpperCase());
             return `<div class="am-school-card">
                 <div class="am-school-icon"><i class="fas fa-university"></i></div>
-                <div>
+                <div style="flex:1;">
                     <div class="am-school-name">${s.name || 'Unnamed School'}</div>
-                    <div class="am-school-detail">${regionLabel}${s.type ? ' · ' + s.type : ''}</div>
+                    <div class="am-school-detail">${countryLabel}${s.type ? ' · ' + s.type : ''}</div>
                 </div>
                 <div class="am-school-stats">
                     <div><div class="am-school-stat-val">${s.studentCount || 0}</div><div class="am-school-stat-label">Students</div></div>
                     <div><div class="am-school-stat-val">${s.teacherCount || 0}</div><div class="am-school-stat-label">Teachers</div></div>
+                </div>
+                <div style="display:flex; gap:0.5rem; margin-left:1rem; flex-shrink:0;">
+                    <button class="sd-icon-btn edit-school-btn" data-id="${s.id}" title="Edit School" style="color:var(--sd-primary); border:1px solid var(--sd-border);"><i class="fas fa-edit"></i></button>
+                    <button class="sd-icon-btn delete-school-btn" data-id="${s.id}" title="Delete School" style="color:#ef4444; border:1px solid var(--sd-border);"><i class="fas fa-trash"></i></button>
                 </div>
             </div>`;
         }).join('');
@@ -267,8 +317,8 @@
         const q = (document.getElementById('search-input').value || '').toLowerCase();
         let filtered = allUsers;
         if (currentTab !== 'all' && currentTab !== 'schools') {
-            const roleMap = { students:'student', teachers:'teacher', parents:'parent' };
-            filtered = allUsers.filter(u => u.role === roleMap[currentTab]);
+            const roleMap = { students:['student'], teachers:['teacher', 'limited_teacher', 'limited teacher'], parents:['parent'] };
+            filtered = allUsers.filter(u => roleMap[currentTab] && roleMap[currentTab].includes(u.role));
         }
         if (q) {
             filtered = filtered.filter(u => {
@@ -322,11 +372,41 @@
             // Merge all users
             const usersMap = {};
             usersSnap.forEach(d => usersMap[d.id] = { id: d.id, ...d.data() });
-            studentsSnap.forEach(d => { if (!usersMap[d.id]) usersMap[d.id] = { id: d.id, role: 'student', ...d.data() }; });
-            teachersSnap.forEach(d => { if (!usersMap[d.id]) usersMap[d.id] = { id: d.id, role: 'teacher', ...d.data() }; });
-            parentsSnap.forEach(d => { if (!usersMap[d.id]) usersMap[d.id] = { id: d.id, role: 'parent', ...d.data() }; });
+            
+            // Assign roles based on collections to ensure correctness
+            studentsSnap.forEach(d => { 
+                if (!usersMap[d.id]) usersMap[d.id] = { id: d.id, ...d.data() };
+                usersMap[d.id].role = 'student'; 
+            });
+            parentsSnap.forEach(d => { 
+                if (!usersMap[d.id]) usersMap[d.id] = { id: d.id, ...d.data() };
+                usersMap[d.id].role = 'parent'; 
+            });
+            teachersSnap.forEach(d => { 
+                if (!usersMap[d.id]) usersMap[d.id] = { id: d.id, ...d.data() };
+                // Keep special teacher roles if they have them, otherwise set to teacher
+                if (!['school_admin', 'limited_teacher', 'limited teacher'].includes(usersMap[d.id].role)) {
+                    usersMap[d.id].role = 'teacher'; 
+                }
+            });
 
             allUsers = Object.values(usersMap);
+            
+            // Final fallback to fix legacy parents stored in teachers collection
+            allUsers.forEach(u => {
+                if (u.userType === 'parent' || u.role === 'parent' || u.role === 'PARENT') {
+                    u.role = 'parent';
+                } else if (u.userType === 'student') {
+                    u.role = 'student';
+                } else if (u.userType === 'teacher' && !['school_admin', 'limited_teacher', 'limited teacher'].includes(u.role)) {
+                    u.role = 'teacher';
+                }
+                
+                // Normalization for matching CSS and tab counts cleanly
+                if (!u.role) u.role = 'unknown';
+            });
+            
+            allUsers.sort((a, b) => (a.name || a.firstName || '').localeCompare(b.name || b.firstName || ''));
             allUsers.sort((a, b) => (a.name || a.firstName || '').localeCompare(b.name || b.firstName || ''));
 
             allSchools = [];
@@ -334,7 +414,7 @@
 
             // Update counts
             const students = allUsers.filter(u => u.role === 'student');
-            const teachers = allUsers.filter(u => u.role === 'teacher');
+            const teachers = allUsers.filter(u => ['teacher', 'limited_teacher', 'limited teacher'].includes(u.role));
             const parents = allUsers.filter(u => u.role === 'parent');
 
             document.getElementById('count-all').textContent = allUsers.length;
@@ -356,12 +436,124 @@
                 tab.classList.add('active');
                 currentTab = tab.dataset.tab;
                 document.getElementById(`panel-${currentTab}`).style.display = 'block';
+                document.getElementById('add-school-btn').style.display = currentTab === 'schools' ? 'inline-flex' : 'none';
                 filterAndRender();
             });
         });
 
         // Search
         document.getElementById('search-input').addEventListener('input', filterAndRender);
+        
+        // Delete Users
+        document.querySelector('.sd-body').addEventListener('click', async (e) => {
+            const delBtn = e.target.closest('.delete-user-btn');
+            if (delBtn) {
+                if (confirm('Are you sure you want to remove this user? This will remove them from the database and cannot be undone.')) {
+                    const id = delBtn.dataset.id;
+                    const role = delBtn.dataset.role;
+                    const btn = delBtn;
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                    try {
+                        const { deleteDoc } = await import('https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js');
+                        
+                        // Delete from main users collection
+                        await deleteDoc(doc(db, 'users', id));
+                        
+                        // Delete from specific collection based on role
+                        if (role === 'student') await deleteDoc(doc(db, 'students', id));
+                        else if (role === 'parent') await deleteDoc(doc(db, 'parents', id));
+                        else if (['teacher', 'limited_teacher', 'limited teacher', 'school_admin'].includes(role)) await deleteDoc(doc(db, 'teachers', id));
+                        else if (role === 'admin') await deleteDoc(doc(db, 'admins', id));
+                        
+                        // Update local array and re-render
+                        allUsers = allUsers.filter(u => u.id !== id);
+                        
+                        // Update counts
+                        const students = allUsers.filter(u => u.role === 'student');
+                        const teachers = allUsers.filter(u => ['teacher', 'limited_teacher', 'limited teacher'].includes(u.role));
+                        const parents = allUsers.filter(u => u.role === 'parent');
+
+                        document.getElementById('count-all').textContent = allUsers.length;
+                        document.getElementById('count-students').textContent = students.length;
+                        document.getElementById('count-teachers').textContent = teachers.length;
+                        document.getElementById('count-parents').textContent = parents.length;
+                        
+                        filterAndRender();
+                    } catch(err) {
+                        alert('Error deleting user: ' + err.message);
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-trash"></i>';
+                    }
+                }
+            }
+        });
+        
+        // Edit/Delete Schools
+        document.getElementById('schools-list').addEventListener('click', async (e) => {
+            const delBtn = e.target.closest('.delete-school-btn');
+            if (delBtn) {
+                if (confirm('Are you sure you want to delete this school? This action cannot be undone.')) {
+                    const id = delBtn.dataset.id;
+                    const btn = delBtn;
+                    btn.disabled = true;
+                    try {
+                        const { deleteDoc } = await import('https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js');
+                        await deleteDoc(doc(db, 'schools', id));
+                        allSchools = allSchools.filter(s => s.id !== id);
+                        document.getElementById('count-schools').textContent = allSchools.length;
+                        filterAndRender();
+                    } catch(err) {
+                        alert('Error deleting school: ' + err.message);
+                        btn.disabled = false;
+                    }
+                }
+            }
+            
+            const editBtn = e.target.closest('.edit-school-btn');
+            if (editBtn) {
+                const id = editBtn.dataset.id;
+                const school = allSchools.find(s => s.id === id);
+                if (school) {
+                    document.getElementById('edit-school-id').value = school.id;
+                    document.getElementById('edit-school-name').value = school.name || '';
+                    document.getElementById('edit-school-country').value = school.country || 'other';
+                    document.getElementById('edit-school-type').value = school.type || 'primary';
+                    document.getElementById('edit-school-modal').style.display = 'flex';
+                }
+            }
+        });
+        
+        document.getElementById('cancel-edit-school').addEventListener('click', () => {
+            document.getElementById('edit-school-modal').style.display = 'none';
+        });
+        
+        document.getElementById('save-edit-school').addEventListener('click', async () => {
+            const id = document.getElementById('edit-school-id').value;
+            const name = document.getElementById('edit-school-name').value;
+            const country = document.getElementById('edit-school-country').value;
+            const type = document.getElementById('edit-school-type').value;
+            
+            const btn = document.getElementById('save-edit-school');
+            btn.disabled = true;
+            btn.innerHTML = 'Saving...';
+            
+            try {
+                const { updateDoc } = await import('https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js');
+                await updateDoc(doc(db, 'schools', id), { name, country, type });
+                const school = allSchools.find(s => s.id === id);
+                if (school) {
+                    school.name = name; school.country = country; school.type = type;
+                }
+                document.getElementById('edit-school-modal').style.display = 'none';
+                filterAndRender();
+            } catch(err) {
+                alert('Error updating school: ' + err.message);
+            }
+            
+            btn.disabled = false;
+            btn.innerHTML = 'Save Changes';
+        });
     });
 </script>
 </body>
